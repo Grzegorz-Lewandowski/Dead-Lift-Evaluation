@@ -4,3 +4,4 @@ mediapipe
 django
 djangorestframework
 python-dotenv
+matplotlib
