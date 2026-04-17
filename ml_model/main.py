@@ -1,13 +1,25 @@
 from analysis.pose_estimation import PoseEstimator
-from utils.visualization_util import draw_landmarks_on_image
-from constants import IMPORTANT_JOINTS, DEFAULT_IMAGE_PATH
+from analysis.side_selection import select_better_visible_side, get_side_visibility_scores
+from analysis.biomechanical_metrics import print_all_angles
 
+from utils.visualization_util import draw_landmarks_on_image
+from utils.joint_utils import get_joint_id
+
+from constants import (
+    IMPORTANT_JOINTS,
+    DEFAULT_IMAGE_PATH,
+    LEFT,
+    RIGHT,
+)
 
 def main():
     image_path = DEFAULT_IMAGE_PATH
 
     estimator = PoseEstimator()
-    joints = estimator.detect_pose_from_image(image_path)
+
+    joints = estimator.detect_pose_from_image(
+        image_path
+    )
 
     if joints is None:
         print("Nie wykryto sylwetki.")
@@ -15,7 +27,8 @@ def main():
 
     print("Najważniejsze stawy:\n")
 
-    for joint_id, joint_name in IMPORTANT_JOINTS.items():
+    for joint_name in IMPORTANT_JOINTS:
+        joint_id = get_joint_id(joint_name)
         data = joints[joint_id]
 
         print(
@@ -26,8 +39,22 @@ def main():
             f"visibility: {data['visibility']:.3f}"
         )
 
-    draw_landmarks_on_image(image_path, joints)
+    draw_landmarks_on_image(
+        image_path,
+        joints
+    )
 
+    print_all_angles(joints)
+
+    scores = get_side_visibility_scores(joints)
+
+    print("\nSide visibility scores:")
+    print(f"{LEFT:5s} | {scores[LEFT]:.3f}")
+    print(f"{RIGHT:5s} | {scores[RIGHT]:.3f}")
+
+    selected_side = select_better_visible_side(joints)
+
+    print(f"\nSelected side for analysis: {selected_side}")
 
 if __name__ == "__main__":
     main()
