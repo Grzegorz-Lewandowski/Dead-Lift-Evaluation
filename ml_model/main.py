@@ -1,9 +1,12 @@
 from analysis.pose_estimation import PoseEstimator
-from analysis.side_selection import select_better_visible_side, get_side_visibility_scores
-from analysis.biomechanical_metrics import print_all_angles
-
 from utils.visualization_util import draw_landmarks_on_image
 from utils.joint_utils import get_joint_id
+
+from analysis.side_selection import (
+    select_better_visible_side,
+    get_side_visibility_scores,
+)
+from analysis.biomechanical_metrics import print_single_side_biomechanical_metrics
 
 from constants import (
     IMPORTANT_JOINTS,
@@ -12,14 +15,12 @@ from constants import (
     RIGHT,
 )
 
+
 def main():
     image_path = DEFAULT_IMAGE_PATH
 
     estimator = PoseEstimator()
-
-    joints = estimator.detect_pose_from_image(
-        image_path
-    )
+    joints = estimator.detect_pose_from_image(image_path)
 
     if joints is None:
         print("Nie wykryto sylwetki.")
@@ -39,13 +40,6 @@ def main():
             f"visibility: {data['visibility']:.3f}"
         )
 
-    draw_landmarks_on_image(
-        image_path,
-        joints
-    )
-
-    print_all_angles(joints)
-
     scores = get_side_visibility_scores(joints)
 
     print("\nSide visibility scores:")
@@ -55,6 +49,11 @@ def main():
     selected_side = select_better_visible_side(joints)
 
     print(f"\nSelected side for analysis: {selected_side}")
+
+    print_single_side_biomechanical_metrics(joints, selected_side)
+
+    draw_landmarks_on_image(image_path, joints)
+
 
 if __name__ == "__main__":
     main()

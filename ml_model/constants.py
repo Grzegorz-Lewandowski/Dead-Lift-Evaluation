@@ -1,6 +1,3 @@
-
-# --------- CONSTANTS ---------
-
 # --- SIDES ---
 
 LEFT = "left"
@@ -11,63 +8,7 @@ SIDES = (
     RIGHT,
 )
 
-# --- JOINT PARTS USED FOR SIDE SELECTION ---
-
-SIDE_SELECTION_JOINT_PARTS = (
-    "shoulder",
-    "wrist",
-    "hip",
-    "knee",
-    "ankle",
-)
-
-# --- ANGLES DEFINITIONS ---
-
-ANGLE_DEFINITIONS = {
-    # KNEE
-
-    "right_knee_angle": (
-        "right_hip",
-        "right_knee",
-        "right_ankle",
-    ),
-
-    "left_knee_angle": (
-        "left_hip",
-        "left_knee",
-        "left_ankle",
-    ),
-
-    # HIP
-
-    "right_hip_angle": (
-        "right_shoulder",
-        "right_hip",
-        "right_knee",
-    ),
-
-    "left_hip_angle": (
-        "left_shoulder",
-        "left_hip",
-        "left_knee",
-    ),
-
-    # SHOULDER
-
-    "right_shoulder_angle": (
-        "right_hip",
-        "right_shoulder",
-        "right_wrist",
-    ),
-
-    "left_shoulder_angle": (
-        "left_hip",
-        "left_shoulder",
-        "left_wrist",
-    ),
-}
-
-# mapowanie nazw stawów na ID MediaPipe
+# --- IMPORTANT JOINTS ---
 
 JOINT_IDS = {
     "left_shoulder": 11,
@@ -82,8 +23,6 @@ JOINT_IDS = {
     "right_ankle": 28,
 }
 
-# lista ważnych stawów
-
 IMPORTANT_JOINTS = [
     "left_shoulder",
     "right_shoulder",
@@ -97,25 +36,48 @@ IMPORTANT_JOINTS = [
     "right_ankle",
 ]
 
-# skeleton connectors opisany nazwami
-
 SKELETON_CONNECTIONS = [
     ("left_shoulder", "left_hip"),
     ("right_shoulder", "right_hip"),
-
     ("left_hip", "right_hip"),
     ("left_shoulder", "right_shoulder"),
-
     ("left_hip", "left_knee"),
     ("left_knee", "left_ankle"),
-
     ("right_hip", "right_knee"),
     ("right_knee", "right_ankle"),
-
     ("left_wrist", "left_shoulder"),
     ("right_wrist", "right_shoulder"),
-
 ]
+# --- SIDE SELECTION JOINT PARTS
+SIDE_SELECTION_JOINT_PARTS = (
+    "shoulder",
+    "wrist",
+    "hip",
+    "knee",
+    "ankle",
+)
+
+# --- SINGLE-SIDE ANGLE DEFINITIONS ---
+
+SINGLE_SIDE_ANGLE_DEFINITIONS = {
+    "knee_angle": (
+        "{side}_hip",
+        "{side}_knee",
+        "{side}_ankle",
+    ),
+    "hip_angle": (
+        "{side}_shoulder",
+        "{side}_hip",
+        "{side}_knee",
+    ),
+    "shoulder_angle": (
+        "{side}_hip",
+        "{side}_shoulder",
+        "{side}_wrist",
+    ),
+}
+
+# --- PATHS ---
 
 MODEL_PATH = "models/pose_landmarker_lite.task"
 DEFAULT_IMAGE_PATH = "sample.jpg"
