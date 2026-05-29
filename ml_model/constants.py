@@ -79,8 +79,27 @@ SINGLE_SIDE_ANGLE_DEFINITIONS = {
 
 # --- PATHS ---
 
-MODEL_PATH = "models/pose_landmarker_lite.task"
-DEFAULT_IMAGE_PATH = "sample.jpg"
-DEFAULT_VISUALIZATION_OUTPUT_PATH = "output_visualization.png"
+MODEL_PATH = "models/pose_landmarker_heavy.task"
+DEFAULT_IMAGE_PATH = "tests/test_data/front.jpeg"
+DEFAULT_VISUALIZATION_OUTPUT_PATH = "tests/test_data/output_visualization.png"
+DEFAULT_VIDEO_PATH = "tests/test_data/pants_side.MOV"
+DEFAULT_OUTPUT_VIDEO_PATH = "tests/test_data/output_video.mp4"
 
+# --- ANALYSIS PARAMS ---
+
+VIDEO_FRAME_STRIDE = 5
 MIN_VISIBILITY_THRESHOLD = 0.5
+
+# -- BARBEL AND REPETITION ---
+
+BAR_POSITION_METHOD = "wrist_midpoint"
+BAR_Y_SMOOTHING_WINDOW_SIZE = 5
+REPETITION_BOTTOM_TOLERANCE = 0.08
+MIN_REP_DURATION_SECONDS = 1.0
+
+REPETITION_EXTREMA_WINDOW_SIZE = 2
+MIN_REPETITION_VERTICAL_RANGE = 0.12
+MIN_REP_DURATION_SECONDS = 1.0
+
+REP_PHASE_LIFTING = "lifting"
+REP_PHASE_LOWERING = "lowering"

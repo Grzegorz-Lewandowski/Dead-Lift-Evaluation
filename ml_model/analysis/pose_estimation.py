@@ -28,11 +28,14 @@ class PoseEstimator:
                 f"Nie udało się wczytać obrazu: {image_path}"
             )
 
-        rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        return self.detect_pose_from_frame(image)
+
+    def detect_pose_from_frame(self, frame):
+        rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
         mp_image = mp.Image(
             image_format=mp.ImageFormat.SRGB,
-            data=rgb_image
+            data=rgb_frame
         )
 
         result = self.detector.detect(mp_image)
@@ -40,7 +43,11 @@ class PoseEstimator:
         if not result.pose_landmarks:
             return None
 
-        landmarks = result.pose_landmarks[0]
+        detected_pose_landmarks = result.pose_landmarks[0]
+
+        return self.extract_joint_data(detected_pose_landmarks)
+
+    def extract_joint_data(self, landmarks):
         joint_data = {}
 
         for i, landmark in enumerate(landmarks):

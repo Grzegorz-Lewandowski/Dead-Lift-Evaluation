@@ -47,7 +47,8 @@ def draw_landmarks_on_image(
             x_px,
             y_px,
             joint_name,
-            fontsize=9
+            fontsize=9,
+            color="white"
         )
 
     # rysuj linie skeleton
@@ -76,5 +77,5 @@ def draw_landmarks_on_image(
         bbox_inches="tight"
     )
 
-    print(f"Zapisano obraz: {save_path}")
+    print(f"Image saved to: {save_path}")
     plt.show()

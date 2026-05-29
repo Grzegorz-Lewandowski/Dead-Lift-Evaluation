@@ -215,3 +215,4 @@ uploads/
 *.mov
 *.jpg
 *.png
+ml_model/tests/test_data/
