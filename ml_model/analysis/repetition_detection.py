@@ -2,10 +2,16 @@ from constants import (
     REPETITION_EXTREMA_WINDOW_SIZE,
     MIN_REPETITION_VERTICAL_RANGE,
     MIN_REP_DURATION_SECONDS,
+    BAR_Y_SMOOTHING_WINDOW_SIZE,
+    BOTTOM_ZONE_RATIO,
+    PREPARATION_LOOKBACK_SECONDS,
+    MIN_LIFTING_BAR_Y_CHANGE,
+    REP_PHASE_IDLE,
+    REP_PHASE_PREPARATION,
     REP_PHASE_LIFTING,
     REP_PHASE_LOWERING,
-    BAR_Y_SMOOTHING_WINDOW_SIZE,
 )
+
 
 def get_valid_bar_points(timeline):
     points = []
@@ -105,9 +111,66 @@ def find_local_extrema(points, window_size=REPETITION_EXTREMA_WINDOW_SIZE):
     return extrema
 
 
-def build_repetitions_from_extrema(extrema):
+def calculate_bottom_zone_threshold(points):
+    bottom_y = max(point["bar_y"] for point in points)
+    top_y = min(point["bar_y"] for point in points)
+
+    movement_range = bottom_y - top_y
+
+    return bottom_y - (movement_range * BOTTOM_ZONE_RATIO)
+
+
+def find_lifting_start_between(points, bottom_point, top_point):
+    """
+    Szuka faktycznego startu podnoszenia:
+    pierwszej klatki po dole, gdzie sztanga opuściła bottom zone
+    i przesunęła się wystarczająco w górę.
+    """
+
+    points_between = [
+        point for point in points
+        if bottom_point["timestamp_seconds"] <= point["timestamp_seconds"] <= top_point["timestamp_seconds"]
+    ]
+
+    if len(points_between) < 2:
+        return bottom_point
+
+    bottom_y = bottom_point["bar_y"]
+    required_y = bottom_y - MIN_LIFTING_BAR_Y_CHANGE
+
+    for point in points_between:
+        if point["bar_y"] <= required_y:
+            return point
+
+    return points_between[0]
+
+
+def find_preparation_start(points, bottom_point, lifting_start_point, bottom_zone_threshold):
+    """
+    Preparation = czas przed oderwaniem sztangi, gdy zawodnik jest w okolicy dołu.
+    Nie próbujemy jeszcze wykrywać pracy biodra; bierzemy krótki setup przed lifting_start,
+    ograniczony bottom zone i lookbackiem czasowym.
+    """
+
+    earliest_time = lifting_start_point["timestamp_seconds"] - PREPARATION_LOOKBACK_SECONDS
+
+    candidates = [
+        point for point in points
+        if earliest_time <= point["timestamp_seconds"] <= lifting_start_point["timestamp_seconds"]
+        and point["bar_y"] >= bottom_zone_threshold
+    ]
+
+    if not candidates:
+        return bottom_point
+
+    return candidates[0]
+
+
+def build_repetitions_from_extrema(points, extrema):
     repetitions = []
     rep_number = 1
+
+    bottom_zone_threshold = calculate_bottom_zone_threshold(points)
 
     index = 0
 
@@ -129,7 +192,20 @@ def build_repetitions_from_extrema(extrema):
         vertical_range_up = first["bar_y"] - second["bar_y"]
         vertical_range_down = third["bar_y"] - second["bar_y"]
 
-        duration = third["timestamp_seconds"] - first["timestamp_seconds"]
+        lifting_start_point = find_lifting_start_between(
+            points,
+            first,
+            second,
+        )
+
+        preparation_start_point = find_preparation_start(
+            points,
+            first,
+            lifting_start_point,
+            bottom_zone_threshold,
+        )
+
+        duration = third["timestamp_seconds"] - lifting_start_point["timestamp_seconds"]
 
         has_enough_range = (
             vertical_range_up >= MIN_REPETITION_VERTICAL_RANGE
@@ -142,14 +218,28 @@ def build_repetitions_from_extrema(extrema):
             repetitions.append({
                 "rep_number": rep_number,
 
-                "start_frame": first["frame_number"],
+                "preparation_start_frame": preparation_start_point["frame_number"],
+                "lifting_start_frame": lifting_start_point["frame_number"],
                 "top_frame": second["frame_number"],
-                "end_frame": third["frame_number"],
+                "lowering_end_frame": third["frame_number"],
 
-                "start_time": first["timestamp_seconds"],
+                "preparation_start_time": preparation_start_point["timestamp_seconds"],
+                "lifting_start_time": lifting_start_point["timestamp_seconds"],
                 "top_time": second["timestamp_seconds"],
-                "end_time": third["timestamp_seconds"],
+                "lowering_end_time": third["timestamp_seconds"],
 
+                "preparation_duration_seconds": (
+                    lifting_start_point["timestamp_seconds"]
+                    - preparation_start_point["timestamp_seconds"]
+                ),
+                "lifting_duration_seconds": (
+                    second["timestamp_seconds"]
+                    - lifting_start_point["timestamp_seconds"]
+                ),
+                "lowering_duration_seconds": (
+                    third["timestamp_seconds"]
+                    - second["timestamp_seconds"]
+                ),
                 "duration_seconds": duration,
 
                 "vertical_range_up": vertical_range_up,
@@ -166,44 +256,45 @@ def build_repetitions_from_extrema(extrema):
 
 def detect_repetitions(timeline):
     points = get_valid_bar_points(timeline)
-
     smoothed_points = smooth_bar_y_points(points)
 
     extrema = find_local_extrema(smoothed_points)
 
-    repetitions = build_repetitions_from_extrema(extrema)
+    repetitions = build_repetitions_from_extrema(
+        smoothed_points,
+        extrema,
+    )
 
     return repetitions
 
 
 def assign_repetitions_to_timeline(timeline, repetitions):
-    """
-    Dodaje do każdego elementu timeline:
-    - rep_number
-    - rep_phase
-    """
-
     for item in timeline:
         item["rep_number"] = None
-        item["rep_phase"] = None
+        item["rep_phase"] = REP_PHASE_IDLE
 
     for repetition in repetitions:
         rep_number = repetition["rep_number"]
 
-        start_frame = repetition["start_frame"]
+        preparation_start_frame = repetition["preparation_start_frame"]
+        lifting_start_frame = repetition["lifting_start_frame"]
         top_frame = repetition["top_frame"]
-        end_frame = repetition["end_frame"]
+        lowering_end_frame = repetition["lowering_end_frame"]
 
         for item in timeline:
             frame_number = item["frame_number"]
 
-            if start_frame <= frame_number <= end_frame:
+            if preparation_start_frame <= frame_number < lifting_start_frame:
                 item["rep_number"] = rep_number
+                item["rep_phase"] = REP_PHASE_PREPARATION
 
-                if frame_number <= top_frame:
-                    item["rep_phase"] = REP_PHASE_LIFTING
-                else:
-                    item["rep_phase"] = REP_PHASE_LOWERING
+            elif lifting_start_frame <= frame_number <= top_frame:
+                item["rep_number"] = rep_number
+                item["rep_phase"] = REP_PHASE_LIFTING
+
+            elif top_frame < frame_number <= lowering_end_frame:
+                item["rep_number"] = rep_number
+                item["rep_phase"] = REP_PHASE_LOWERING
 
     return timeline
 
@@ -218,12 +309,15 @@ def print_detected_repetitions(repetitions):
     for repetition in repetitions:
         print(
             f"rep={repetition['rep_number']:2d} | "
-            f"start={repetition['start_time']:6.2f}s "
-            f"(frame={repetition['start_frame']:4d}) | "
+            f"prep={repetition['preparation_start_time']:6.2f}s "
+            f"(frame={repetition['preparation_start_frame']:4d}) | "
+            f"lift_start={repetition['lifting_start_time']:6.2f}s "
+            f"(frame={repetition['lifting_start_frame']:4d}) | "
             f"top={repetition['top_time']:6.2f}s "
             f"(frame={repetition['top_frame']:4d}) | "
-            f"end={repetition['end_time']:6.2f}s "
-            f"(frame={repetition['end_frame']:4d}) | "
-            f"duration={repetition['duration_seconds']:5.2f}s | "
-            f"range_up={repetition['vertical_range_up']:.3f}"
+            f"end={repetition['lowering_end_time']:6.2f}s "
+            f"(frame={repetition['lowering_end_frame']:4d}) | "
+            f"prep_dur={repetition['preparation_duration_seconds']:5.2f}s | "
+            f"lift_dur={repetition['lifting_duration_seconds']:5.2f}s | "
+            f"lower_dur={repetition['lowering_duration_seconds']:5.2f}s"
         )
