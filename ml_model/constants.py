@@ -79,11 +79,11 @@ SINGLE_SIDE_ANGLE_DEFINITIONS = {
 
 # --- PATHS ---
 
-MODEL_PATH = "models/pose_landmarker_heavy.task"
-DEFAULT_IMAGE_PATH = "tests/test_data/front.jpeg"
-DEFAULT_VISUALIZATION_OUTPUT_PATH = "tests/test_data/output_visualization.png"
-DEFAULT_VIDEO_PATH = "tests/test_data/shorts_side.MOV"
-DEFAULT_OUTPUT_VIDEO_PATH = "tests/test_data/output_video.mp4"
+MODEL_PATH = "C:/Users/grzegorz.lewandowski/source/repos/Dead-Lift-Evaluation/ml_model/models/pose_landmarker_heavy.task"
+DEFAULT_IMAGE_PATH = "C:/Users/grzegorz.lewandowski/source/repos/Dead-Lift-Evaluation/ml_model/tests/test_data/front.jpeg"
+DEFAULT_VISUALIZATION_OUTPUT_PATH = "C:/Users/grzegorz.lewandowski/source/repos/Dead-Lift-Evaluation/ml_model/tests/test_data/output_visualization.png"
+DEFAULT_VIDEO_PATH = "C:/Users/grzegorz.lewandowski/source/repos/Dead-Lift-Evaluation/ml_model/tests/test_data/shorts_side.MOV"
+DEFAULT_OUTPUT_VIDEO_PATH = "C:/Users/grzegorz.lewandowski/source/repos/Dead-Lift-Evaluation/ml_model/tests/test_data/output_video.mp4"
 
 # --- ANALYSIS PARAMS ---
 
