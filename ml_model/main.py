@@ -1,22 +1,5 @@
-from analysis.pose_estimation import PoseEstimator
-from analysis.video_analysis import analyze_video, print_video_timeline
+from analysis.deadlift_analyzer import DeadliftAnalyzer
 from utils.video_visualization_util import create_annotated_video
-from analysis.repetition_detection import (
-    detect_repetitions,
-    assign_repetitions_to_timeline,
-    print_detected_repetitions,
-)
-from analysis.repetition_summary import (
-    summarize_repetitions,
-    print_repetition_summaries,
-)
-
-from analysis.technique_evaluation import (
-    evaluate_repetitions,
-    evaluate_repetition_consistency,
-    print_technique_evaluations,
-    print_consistency_evaluation,
-)
 
 from constants import (
     DEFAULT_VIDEO_PATH,
@@ -25,27 +8,42 @@ from constants import (
 
 
 def main():
-    estimator = PoseEstimator()
+    analyzer = DeadliftAnalyzer()
 
-    timeline = analyze_video(DEFAULT_VIDEO_PATH, estimator)
+    result = analyzer.analyze(DEFAULT_VIDEO_PATH)
 
-    repetitions = detect_repetitions(timeline)
-    timeline = assign_repetitions_to_timeline(timeline, repetitions)
+    print("\nTechnique evaluation:\n")
+    for evaluation in result["evaluations"]:
+        print(
+            f"rep={evaluation['rep_number']:2d} | "
+            f"status={evaluation['overall_status']}"
+        )
 
-    summaries = summarize_repetitions(timeline, repetitions)
-    evaluations = evaluate_repetitions(summaries)
-    consistency_evaluation = evaluate_repetition_consistency(summaries)
+        for check_name, check_result in evaluation["checks"].items():
+            print(
+                f"  - {check_name:25s} | "
+                f"{check_result['status']:7s} | "
+                f"{check_result['message']}"
+            )
 
-    print_video_timeline(timeline)
-    print_detected_repetitions(repetitions)
-    print_repetition_summaries(summaries)
-    print_technique_evaluations(evaluations)
-    print_consistency_evaluation(consistency_evaluation)
+        print()
+
+    print("\nSeries consistency evaluation:\n")
+    consistency = result["consistency_evaluation"]
+
+    print(f"status={consistency['overall_status']}")
+
+    for check_name, check_result in consistency["checks"].items():
+        print(
+            f"  - {check_name:25s} | "
+            f"{check_result['status']:7s} | "
+            f"{check_result['message']}"
+        )
 
     create_annotated_video(
         DEFAULT_VIDEO_PATH,
         DEFAULT_OUTPUT_VIDEO_PATH,
-        estimator,
+        analyzer.estimator,
     )
 
 
