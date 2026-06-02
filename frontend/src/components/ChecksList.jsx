@@ -10,12 +10,12 @@ function ChecksList({ checks }) {
     <div className="checks-list">
       {Object.entries(checks).map(([checkName, check]) => (
         <div key={checkName} className="check-row">
-          <StatusBadge status={check.status} />
-
-          <div>
+          <div className="check-content">
             <p className="check-name">{formatCheckName(checkName)}</p>
             <p className="check-message">{check.message}</p>
           </div>
+
+          <StatusBadge status={check.status} />
         </div>
       ))}
     </div>
