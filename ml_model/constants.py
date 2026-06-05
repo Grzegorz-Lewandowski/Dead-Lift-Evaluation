@@ -82,12 +82,12 @@ SINGLE_SIDE_ANGLE_DEFINITIONS = {
 MODEL_PATH = "C:/Users/grzegorz.lewandowski/source/repos/Dead-Lift-Evaluation/ml_model/models/pose_landmarker_heavy.task"
 DEFAULT_IMAGE_PATH = "C:/Users/grzegorz.lewandowski/source/repos/Dead-Lift-Evaluation/ml_model/tests/test_data/front.jpeg"
 DEFAULT_VISUALIZATION_OUTPUT_PATH = "C:/Users/grzegorz.lewandowski/source/repos/Dead-Lift-Evaluation/ml_model/tests/test_data/output_visualization.png"
-DEFAULT_VIDEO_PATH = "C:/Users/grzegorz.lewandowski/source/repos/Dead-Lift-Evaluation/ml_model/tests/test_data/shorts_side.MOV"
+DEFAULT_VIDEO_PATH = "C:/Users/grzegorz.lewandowski/source/repos/Dead-Lift-Evaluation/ml_model/tests/test_data/tilted_side.MOV"
 DEFAULT_OUTPUT_VIDEO_PATH = "C:/Users/grzegorz.lewandowski/source/repos/Dead-Lift-Evaluation/ml_model/tests/test_data/output_video.mp4"
 
 # --- ANALYSIS PARAMS ---
 
-VIDEO_FRAME_STRIDE = 5
+VIDEO_FRAME_STRIDE = 4
 MIN_VISIBILITY_THRESHOLD = 0.5
 
 # -- BARBEL AND REPETITION ---
@@ -95,10 +95,9 @@ MIN_VISIBILITY_THRESHOLD = 0.5
 BAR_POSITION_METHOD = "wrist_midpoint"
 BAR_Y_SMOOTHING_WINDOW_SIZE = 5
 REPETITION_BOTTOM_TOLERANCE = 0.08
-MIN_REP_DURATION_SECONDS = 1.0
 
 REPETITION_EXTREMA_WINDOW_SIZE = 2
-MIN_REPETITION_VERTICAL_RANGE = 0.12
+MIN_REPETITION_VERTICAL_RANGE = 0.08
 MIN_REP_DURATION_SECONDS = 1.0
 
 REP_PHASE_IDLE = "idle"
@@ -113,6 +112,10 @@ MIN_LIFTING_BAR_Y_CHANGE = 0.03
 MIN_TOP_HIP_ANGLE = 150.0
 MIN_TOP_KNEE_ANGLE = 160.0
 
+REP_VALIDITY_VALID = "valid"
+REP_VALIDITY_PARTIAL = "partial"
+REP_VALIDITY_INVALID = "invalid"
+
 # --- TECHNIQUE ---
 
 EVALUATION_STATUS_OK = "OK"
@@ -120,6 +123,7 @@ EVALUATION_STATUS_INFO = "INFO"
 EVALUATION_STATUS_WARNING = "WARNING"
 
 MAX_TORSO_ANGLE_CHANGE_INFO = 45.0
+TORSO_ANGLE_CHANGE_INFO_ONLY = True
 MAX_TORSO_ANGLE_CHANGE_WARNING = 70.0
 
 MIN_BAR_Y_RANGE = 0.20
@@ -130,3 +134,9 @@ MAX_BAR_RANGE_VARIATION = 0.08
 MAX_REP_DURATION_VARIATION = 1.0
 MAX_TOP_HIP_ANGLE_VARIATION = 15.0
 MAX_TOP_KNEE_ANGLE_VARIATION = 10.0
+# --- TECHNIQUE ---
+
+BAR_RANGE_COMPLETENESS_RATIO = 0.80
+
+START_POSITION_KNEE_ANGLE_DEEP_OFFSET = -15.0
+START_POSITION_KNEE_ANGLE_HIGH_OFFSET = 15.0

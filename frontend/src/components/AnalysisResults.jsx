@@ -2,6 +2,7 @@ import StatusBadge from './StatusBadge'
 import SummaryItem from './SummaryItem'
 import RepetitionCard from './RepetitionCard'
 import ChecksList from './ChecksList'
+import { buildConsistencySummary } from '../utils/formatters'
 
 function AnalysisResults({ analysis }) {
   const result = analysis.result
@@ -62,23 +63,22 @@ function AnalysisResults({ analysis }) {
         )}
       </section>
 
-      {result.consistency_evaluation && (
-        <section className="card">
-          <div className="section-title-row">
-            <div>
-              <h3>Spójność serii</h3>
-              <p className="muted">
-                Ta sekcja porównuje powtórzenia między sobą i sprawdza, czy
-                ruch był powtarzalny.
-              </p>
+        {result.consistency_evaluation && (
+          <section className="card">
+            <div className="section-title-row">
+              <div>
+                <h3>Spójność serii</h3>
+                <p className="muted consistency-summary">
+                  {buildConsistencySummary(result.consistency_evaluation)}
+                </p>
+              </div>
+
+              <StatusBadge status={result.consistency_evaluation.overall_status} />
             </div>
 
-            <StatusBadge status={result.consistency_evaluation.overall_status} />
-          </div>
-
-          <ChecksList checks={result.consistency_evaluation.checks} />
-        </section>
-      )}
+            <ChecksList checks={result.consistency_evaluation.checks} />
+          </section>
+        )}
     </section>
   )
 }

@@ -24,10 +24,24 @@ export const EVALUATION_STATUS = {
   info: 'INFO',
 }
 
+export const REP_VALIDITY = {
+  valid: 'valid',
+  partial: 'partial',
+  invalid: 'invalid',
+}
+
+export const REP_VALIDITY_DISPLAY_STATUS = {
+  partial: 'PARTIAL',
+  invalid: 'INVALID',
+}
+
 export const STATUS_LABELS = {
   [EVALUATION_STATUS.ok]: 'Poprawnie',
   [EVALUATION_STATUS.warning]: 'Wymaga uwagi',
   [EVALUATION_STATUS.info]: 'Informacja',
+
+  [REP_VALIDITY_DISPLAY_STATUS.partial]: 'Częściowe',
+  [REP_VALIDITY_DISPLAY_STATUS.invalid]: 'Niepoprawne',
 
   [ANALYSIS_STATUS.completed]: 'Zakończono',
   [ANALYSIS_STATUS.processing]: 'Analiza trwa',
@@ -39,6 +53,8 @@ export const CHECK_LABELS = {
   hip_lockout: 'Wyprost biodra',
   knee_lockout: 'Wyprost kolana',
   bar_range: 'Zakres ruchu sztangi',
+  start_position: 'Pozycja startowa',
+  start_torso_position: 'Pozycja tułowia na starcie',
   torso_angle_change: 'Zmiana pochylenia tułowia',
   tempo: 'Tempo ruchu',
 

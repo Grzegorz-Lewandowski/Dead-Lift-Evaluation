@@ -3,17 +3,18 @@ from constants import (
     REP_PHASE_LIFTING,
     REP_PHASE_LOWERING,
 )
+from utils.joint_utils import get_joint_data
 
-def get_item_closest_to_time(items, timestamp):
-    if not items:
+def get_joint_from_item(item, joint_name):
+    if item is None:
         return None
 
-    return min(
-        items,
-        key=lambda item: abs(
-            item["timestamp_seconds"] - timestamp
-        )
-    )
+    joints = item.get("joints")
+
+    if joints is None:
+        return None
+
+    return get_joint_data(joints, joint_name)
 
 def get_timeline_items_for_repetition(timeline, rep_number):
     return [
@@ -22,6 +23,19 @@ def get_timeline_items_for_repetition(timeline, rep_number):
         and item.get("pose_detected")
         and item.get("metrics") is not None
     ]
+
+def get_joint_from_item(item, joint_name):
+    if item is None:
+        return None
+
+    joints = item.get("joints")
+
+    if joints is None:
+        return None
+
+    from utils.joint_utils import get_joint_data
+
+    return get_joint_data(joints, joint_name)
 
 def get_phase_items(items, phase):
     return [
@@ -52,6 +66,7 @@ def calculate_duration_from_items(items):
         items[-1]["timestamp_seconds"]
         - items[0]["timestamp_seconds"]
     )
+
 
 def get_metric_values(items, metric_name):
     values = []
@@ -94,6 +109,31 @@ def calculate_min_max_change(values):
         "change": max_value - min_value,
     }
 
+
+def get_item_closest_to_time(items, timestamp):
+    if not items or timestamp is None:
+        return None
+
+    return min(
+        items,
+        key=lambda item: abs(
+            item["timestamp_seconds"] - timestamp
+        )
+    )
+
+
+def get_metric_from_item(item, metric_name):
+    if item is None:
+        return None
+
+    metrics = item.get("metrics")
+
+    if metrics is None:
+        return None
+
+    return metrics.get(metric_name)
+
+
 def summarize_repetition(timeline, repetition):
     rep_number = repetition["rep_number"]
 
@@ -116,27 +156,6 @@ def summarize_repetition(timeline, repetition):
         items,
         REP_PHASE_LOWERING,
     )
-
-    top_item = get_item_closest_to_time(
-        items,
-        repetition["top_time"],
-    )
-    top_hip_angle = None
-    top_knee_angle = None
-    top_back_angle = None
-
-    if top_item is not None:
-        top_hip_angle = top_item["metrics"].get(
-            "hip_angle"
-        )
-
-        top_knee_angle = top_item["metrics"].get(
-            "knee_angle"
-        )
-
-        top_back_angle = top_item["metrics"].get(
-            "back_inclination_angle"
-        )
 
     back_values = get_metric_values(items, "back_inclination_angle")
     hip_values = get_metric_values(items, "hip_angle")
@@ -161,6 +180,66 @@ def summarize_repetition(timeline, repetition):
 
     if lifting_start_time is not None and lowering_end_time is not None:
         total_duration = lowering_end_time - lifting_start_time
+
+    top_item = get_item_closest_to_time(
+        items,
+        top_time,
+    )
+
+    lifting_start_item = get_item_closest_to_time(
+        items,
+        lifting_start_time,
+    )
+
+    top_hip_angle = get_metric_from_item(top_item, "hip_angle")
+    top_knee_angle = get_metric_from_item(top_item, "knee_angle")
+    top_back_angle = get_metric_from_item(
+        top_item,
+        "back_inclination_angle",
+    )
+
+    lifting_start_hip_angle = get_metric_from_item(
+        lifting_start_item,
+        "hip_angle",
+    )
+
+    lifting_start_knee_angle = get_metric_from_item(
+        lifting_start_item,
+        "knee_angle",
+    )
+
+    lifting_start_back_angle = get_metric_from_item(
+        lifting_start_item,
+        "back_inclination_angle",
+    )
+
+    selected_side = None
+
+    if lifting_start_item is not None:
+        selected_side = lifting_start_item.get("selected_side")
+
+    lifting_start_shoulder_y = None
+    lifting_start_hip_y = None
+    shoulder_below_hip_at_start = None
+
+    if selected_side is not None:
+        shoulder = get_joint_from_item(
+            lifting_start_item,
+            f"{selected_side}_shoulder",
+        )
+
+        hip = get_joint_from_item(
+            lifting_start_item,
+            f"{selected_side}_hip",
+        )
+
+        if shoulder is not None and hip is not None:
+            lifting_start_shoulder_y = shoulder["y"]
+            lifting_start_hip_y = hip["y"]
+
+            shoulder_below_hip_at_start = (
+                lifting_start_shoulder_y > lifting_start_hip_y
+            )
 
     return {
         "rep_number": rep_number,
@@ -194,14 +273,28 @@ def summarize_repetition(timeline, repetition):
         "top_hip_angle": top_hip_angle,
         "top_knee_angle": top_knee_angle,
         "top_back_angle": top_back_angle,
-    }
 
+        "lifting_start_hip_angle": lifting_start_hip_angle,
+        "lifting_start_knee_angle": lifting_start_knee_angle,
+        "lifting_start_back_angle": lifting_start_back_angle,
+
+        "lifting_start_shoulder_y": lifting_start_shoulder_y,
+        "lifting_start_hip_y": lifting_start_hip_y,
+        "shoulder_below_hip_at_start": shoulder_below_hip_at_start,
+    }
 
 def summarize_repetitions(timeline, repetitions):
     return [
         summarize_repetition(timeline, repetition)
         for repetition in repetitions
     ]
+
+
+def format_number(value, precision=2):
+    if value is None:
+        return "-"
+
+    return f"{value:.{precision}f}"
 
 
 def print_repetition_summaries(summaries):
@@ -214,12 +307,15 @@ def print_repetition_summaries(summaries):
     for summary in summaries:
         print(
             f"rep={summary['rep_number']:2d} | "
-            f"duration={summary['duration_seconds']:5.2f}s | "
-            f"prep={summary['preparation_duration_seconds']:5.2f}s | "
-            f"lifting={summary['lifting_duration_seconds']:5.2f}s | "
-            f"lowering={summary['lowering_duration_seconds']:5.2f}s | "
-            f"bar_range={summary['bar_y_range']:.3f} | "
-            f"back_change={summary['back_angle_change']:.2f}° | "
-            f"hip_change={summary['hip_angle_change']:.2f}° | "
-            f"knee_change={summary['knee_angle_change']:.2f}°"
+            f"duration={format_number(summary['duration_seconds'])}s | "
+            f"prep={format_number(summary['preparation_duration_seconds'])}s | "
+            f"lifting={format_number(summary['lifting_duration_seconds'])}s | "
+            f"lowering={format_number(summary['lowering_duration_seconds'])}s | "
+            f"bar_range={format_number(summary['bar_y_range'], 3)} | "
+            f"back_change={format_number(summary['back_angle_change'])}° | "
+            f"hip_change={format_number(summary['hip_angle_change'])}° | "
+            f"knee_change={format_number(summary['knee_angle_change'])}° | "
+            f"top_hip={format_number(summary['top_hip_angle'])}° | "
+            f"top_knee={format_number(summary['top_knee_angle'])}° | "
+            f"start_knee={format_number(summary['lifting_start_knee_angle'])}°"
         )

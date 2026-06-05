@@ -22,6 +22,7 @@ def analyze_video(video_path, estimator, frame_stride=VIDEO_FRAME_STRIDE):
                 "selected_side": None,
                 "metrics": None,
                 "bar_position": None,
+                "joints": None,
             })
             continue
 
@@ -41,6 +42,7 @@ def analyze_video(video_path, estimator, frame_stride=VIDEO_FRAME_STRIDE):
             "selected_side": selected_side,
             "metrics": metrics,
             "bar_position": bar_position,
+            "joints": joints,
         })
 
     return timeline

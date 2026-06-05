@@ -35,6 +35,9 @@ class DeadliftAnalyzer:
 
         return {
             "repetitions_count": len(repetitions),
+            "timeline": timeline,
+            "repetitions": repetitions,
+            "summaries": summaries,
             "evaluations": evaluations,
             "consistency_evaluation": consistency_evaluation,
         }
