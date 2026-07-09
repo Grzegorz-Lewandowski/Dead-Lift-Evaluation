@@ -1,0 +1,36 @@
+\section{Cel i zakres pracy}
+
+Celem pracy jest zaprojektowanie i implementacja aplikacji sieciowej umożliwiającej analizę biomechaniki martwego ciągu na podstawie nagrania wideo. System ma umożliwiać użytkownikowi przesłanie materiału wideo, przeprowadzenie analizy po stronie serwera oraz przedstawienie wyników w czytelnej formie w interfejsie graficznym aplikacji.
+
+Projektowane rozwiązanie wykorzystuje gotowy model estymacji pozy człowieka \cite{mediapipe_pose_landmarker}. W pracy pojęcie estymacji pozy człowieka oznacza proces wykrywania punktów kluczowych sylwetki, czyli stawów potrzebnych do analizy \cite{mediapipe_pose_docs}. Uzyskane dane są następnie wykorzystywane do obliczenia wybranych parametrów biomechanicznych oraz oceny techniki wykonania ćwiczenia \cite{wade2022markerless,mundt2024twodimensional}.
+
+Zakres pracy obejmuje:
+\begin{itemize}
+\item analizę podstawowych zagadnień związanych z biomechaniką martwego ciągu oraz oceną jego techniki,
+\item omówienie możliwości wykorzystania estymacji pozy człowieka do analizy ruchu,
+\item wybór oraz zastosowanie gotowego modelu wykrywania punktów kluczowych sylwetki,
+\item zaprojektowanie architektury aplikacji sieciowej,
+\item implementację części klienckiej odpowiedzialnej za interakcję z użytkownikiem,
+\item implementację części serwerowej odpowiedzialnej za obsługę przesłanych nagrań oraz uruchamianie analizy,
+\item implementację modułu analizy nagrania wideo,
+\item obliczanie wybranych parametrów biomechanicznych na podstawie punktów kluczowych sylwetki,
+\item opracowanie reguł oceny techniki wykonania ćwiczenia,
+\item prezentację wyników analizy z podziałem na poszczególne powtórzenia oraz podsumowanie serii,
+\item przeprowadzenie testów działania systemu na wybranych nagraniach.
+\end{itemize}
+
+Praca ma charakter aplikacyjny. Jej celem nie jest opracowanie nowego modelu uczenia maszynowego ani trenowanie modelu od podstaw. Główny nacisk położono na wykorzystanie istniejącego modelu estymacji pozy człowieka oraz przygotowanie kompletnego systemu informatycznego, który integruje warstwę analizy nagrania wideo z warstwą aplikacji sieciowej \cite{mediapipe_pose_landmarker,wade2022markerless}.
+
+W pracy przyjęto również kilka ograniczeń projektowych. System został przygotowany pod kątem analizy nagrań spełniających poniższe warunki:
+\begin{itemize}
+\item wykonane z perspektywy bocznej,
+\item kamera pozostaje statyczna,
+\item cały czas prezentowana jest cała sylwetka osoby wykonującej ćwiczenie,
+\item widoczna jest tylko jedna osoba w kadrze,
+\item rozmiar oraz czas trwania są ograniczone,
+\item ma dopuszczalny format pliku.
+\end{itemize}
+
+Takie wymagania pozwalają na czytelniejszą analizę ruchu w płaszczyźnie strzałkowej, w szczególności ustawienia tułowia oraz pracy stawów biodrowych i kolanowych \cite{hanen2025deadlift,wade2022markerless}. Jakość nagrania ma znaczący wpływ na jakość wyników, co zostanie dokładniej omówione w dalszej części pracy \cite{wade2022markerless}.
+
+Projektowany system należy traktować jako narzędzie wspomagające analizę techniki, a nie jako pełny system diagnostyczny dający w stu procentach dokładne oceny \cite{wade2022markerless}. Wyniki generowane przez aplikację mają pomóc w ocenie wybranych aspektów ruchu i wskazać potencjalne błędy, jednak nie zastępują profesjonalnej analizy prowadzonej przez trenera personalnego, fizjoterapeutę lub specjalistę z zakresu biomechaniki \cite{wade2022markerless}.

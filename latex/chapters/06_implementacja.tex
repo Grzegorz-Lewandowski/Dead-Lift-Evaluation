@@ -1,0 +1,626 @@
+\section{Implementacja systemu}
+
+W poprzednim rozdziale skupiono się na projekcie systemu, przedstawiono jego główne elementy oraz dane, które będą pomiędzy nimi przepływać. Niniejszy rozdział opisuje implementację zaprezentowanego planu. Przedstawia, w jaki sposób w kodzie źródłowym zostały zrealizowane poszczególne elementy niezbędne do prawidłowego działania aplikacji.
+
+Zgodnie z tym, co przedstawiono w projekcie, system zaimplementowano jako aplikację sieciową składającą się z trzech głównych części: aplikacji klienckiej, serwerowej oraz modułu analizy wideo. Każda z tych części ma na celu wykonywanie szczegółowych zadań opisanych w części projektowej.
+
+Opis implementacji uporządkowano zgodnie z przebiegiem działania systemu. W pierwszej kolejności przedstawiono środowisko implementacyjne i organizację kodu źródłowego. Następnie opisano moduł odpowiedzialny za analizę nagrania wideo, ponieważ stanowi on najważniejszą część systemu z punktu widzenia celu pracy. W dalszej części rozdziału omówiono implementację aplikacji serwerowej, interfejsu użytkownika aplikacji klienckiej oraz sposób integracji wszystkich komponentów.
+
+\subsection{Środowisko implementacyjne i organizacja kodu źródłowego}
+
+Kod źródłowy systemu został umieszczony w repozytorium prowadzonym z wykorzystaniem systemu kontroli wersji Git. Repozytorium zawiera kompletną strukturę projektu, pliki konfiguracyjne oraz historię zmian wprowadzanych podczas implementacji. W katalogu głównym projektu znajdują się trzy główne katalogi: \texttt{backend}, \texttt{frontend} oraz \texttt{ml\_model}. Oprócz nich umieszczono tam również między innymi plik \texttt{requirements.txt}, zawierający zależności części serwerowej i modułu analizy, plik \texttt{README.md} oraz plik \texttt{.gitignore}, określający elementy pomijane przez system kontroli wersji.
+
+Taki układ repozytorium porządkuje kod według odpowiedzialności poszczególnych części systemu. Katalog \texttt{backend} zawiera aplikację serwerową, katalog \texttt{frontend} zawiera aplikację kliencką, natomiast katalog \texttt{ml\_model} zawiera kod odpowiedzialny za analizę nagrania wideo. Dokonany podział pozwala zaakcentować separację pomiędzy poszczególnymi częściami aplikacji, zwiększając czytelność rozwiązania znajdującego się w repozytorium~\cite{microsoft_arch_principles}.
+\newpage
+Uproszczoną strukturę katalogów projektu przedstawiono na rysunku~\ref{fig:struktura-repozytorium}.
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.85\textwidth}
+\dirtree{%
+.1 Dead-Lift-Evaluation/.
+.2 backend/.
+.3 api/.
+.3 config/.
+.3 manage.py.
+.2 frontend/.
+.3 public/.
+.3 src/.
+.4 components/.
+.4 config/.
+.4 services/.
+.4 utils/.
+.4 App.jsx.
+.4 main.jsx.
+.3 package.json.
+.2 ml\_model/.
+.3 analysis/.
+.3 models/.
+.3 tests/.
+.3 utils/.
+.3 constants.py.
+.3 main.py.
+.2 .gitignore.
+.2 README.md.
+.2 requirements.txt.
+}
+\end{minipage}
+\caption{Uproszczona struktura katalogów repozytorium projektu. Źródło: opracowanie własne.}
+\label{fig:struktura-repozytorium}
+\end{figure}
+
+
+Część serwerowa została zaimplementowana w języku programowania Python z użyciem szkieletu Django, skupiając się na implementacji interfejsu API w architekturze REST. Jej kod znajduje się w katalogu \texttt{backend}. W katalogu tym umieszczono plik \texttt{manage.py}, katalog konfiguracyjny \texttt{config} oraz aplikację \texttt{api}. Aplikacja \texttt{api} zawiera kod związany z obsługą żądań kierowanych do serwera, definicją danych zapisywanych podczas analizy oraz zwracaniem wyników do aplikacji klienckiej. W tej części projektu warstwa serwerowa pełni rolę pośrednika pomiędzy interfejsem użytkownika a modułem analizy nagrania.
+
+Część kliencka została zaimplementowana w języku JavaScript z użyciem biblioteki React oraz narzędzia Vite. Jej kod znajduje się w katalogu \texttt{frontend}. W katalogu \texttt{src} wydzielono między innymi katalogi \texttt{components}, \texttt{services}, \texttt{config} oraz \texttt{utils}. Katalog \texttt{components} przechowuje elementy interfejsu użytkownika, katalog \texttt{services} zawiera kod odpowiedzialny za komunikację z aplikacją serwerową, katalog \texttt{config} przechowuje ustawienia konfiguracyjne, a katalog \texttt{utils} zawiera klasy pomocnicze. Głównym zadaniem tej części systemu jest umożliwienie użytkownikowi przesłania nagrania oraz zapoznania się z wynikiem analizy w czytelnym interfejsie.
+
+Moduł analizy nagrania wideo został zaimplementowany jako program napisany w języku Python i znajduje się w wydzielonym katalogu \texttt{ml\_model}. W jego strukturze zawierają się główne katalogi: \texttt{analysis}, zawierający klasy odpowiedzialne za analizę, \texttt{models}, w którego skład wchodzą pliki binarne zawierające gotowe modele estymacji punktów kluczowych, \texttt{tests}, przeznaczony na testy, oraz \texttt{utils}, gdzie analogicznie do części klienckiej znajdują się funkcje pomocnicze. W strukturze tego modułu warto zwrócić uwagę na plik \texttt{constants.py}, znajdujący się w katalogu głównym modułu. Odpowiedzialny jest on za przechowywanie stałych definiujących kluczowe parametry przeprowadzanej analizy.
+
+Zależności części napisanej w języku programowania Python zostały określone w pliku \texttt{requirements.txt}. W projekcie wykorzystano między innymi Django, Django REST Framework, MediaPipe, OpenCV, NumPy oraz Matplotlib. Biblioteki te odpowiadają kolejno za implementację aplikacji serwerowej, udostępnienie interfejsu REST API, detekcję punktów kluczowych sylwetki, przetwarzanie obrazu, wykonywanie obliczeń numerycznych oraz pomocniczą obsługę danych i wizualizacji. Zależności części klienckiej oraz skrypty uruchomieniowe zostały określone w pliku \texttt{package.json}. Plik ten wskazuje użycie biblioteki React, React DOM, narzędzia Vite oraz narzędzi pomocniczych związanych z kontrolą jakości kodu JavaScript.
+
+W repozytorium zastosowano również plik \texttt{.gitignore}, którego zadaniem jest określenie plików i katalogów pomijanych przez system kontroli wersji~\cite{gitignore_docs}. W projekcie wykluczono między innymi pliki generowane automatycznie podczas działania Pythona, lokalne środowiska wirtualne, pliki tymczasowe, lokalną bazę danych oraz katalogi i pliki związane z przesyłanymi lub testowymi materiałami wideo. Dzięki temu repozytorium jest utrzymywane w czystej postaci, zawiera kod źródłowy i pliki konfiguracyjne, ale pomija pliki wynikowe oraz należące do lokalnego środowiska programistycznego.
+
+Przyjęta organizacja kodu źródłowego odpowiada architekturze systemu opisanej w poprzednim rozdziale. Aplikacja kliencka odpowiada za interakcję z użytkownikiem, aplikacja serwerowa za obsługę przesłanego nagrania i uruchomienie analizy, natomiast moduł \texttt{ml\_model} za właściwe przetwarzanie materiału wideo oraz wyznaczenie wyników. Dzięki temu w dalszej części rozdziału możliwe jest opisanie implementacji zgodnie z rzeczywistym przebiegiem działania systemu.
+
+\subsection{Implementacja modułu analizy nagrania wideo}
+
+Najważniejszą częścią systemu z punktu widzenia celu pracy jest moduł odpowiedzialny za analizę nagrania wideo. Jego zadaniem jest przetworzenie pliku przesłanego przez użytkownika, wykrycie sylwetki ćwiczącego, wyznaczenie podstawowych parametrów ruchu oraz przygotowanie danych potrzebnych do oceny techniki wykonania martwego ciągu. Kod tego modułu został umieszczony w katalogu \texttt{ml\_model}, natomiast główne funkcje związane z analizą znajdują się w katalogu \texttt{analysis}.
+
+Centralnym elementem modułu jest klasa \texttt{DeadliftAnalyzer}. Nie odpowiada ona bezpośrednio za wszystkie obliczenia, lecz koordynuje kolejne etapy przetwarzania nagrania. Takie rozwiązanie pozwala zachować czytelny przepływ analizy i oddzielić od siebie fragmenty kodu odpowiedzialne za inne zadania. W konstruktorze klasy tworzony jest obiekt estymatora pozy, jeżeli nie został on przekazany z zewnątrz. Dzięki temu klasa może zostać uruchomiona z domyślnym sposobem detekcji punktów kluczowych, ale jednocześnie pozostaje możliwe przekazanie innego obiektu spełniającego tę samą rolę.
+
+Funkcjonalność klasy \texttt{DeadliftAnalyzer} przedstawiono we fragmencie kodu~\ref{lst:deadlift-analyzer}. Na wycinku kodu widać, że nie implementuje ona bezpośrednio wszystkich szczegółowych obliczeń, lecz wywołuje kolejne funkcje odpowiedzialne za poszczególne etapy analizy, zachowując abstrakcję zgodną ze standardami paradygmatu programowania obiektowego.
+
+\begin{lstlisting}[language=Python, caption={Klasa koordynująca proces analizy martwego ciągu. Źródło: opracowanie własne.}, label={lst:deadlift-analyzer}]
+class DeadliftAnalyzer:
+    def __init__(self, estimator=None):
+        self.estimator = estimator or PoseEstimator()
+
+    def analyze(self, video_path: str) -> dict:
+        timeline = analyze_video(video_path, self.estimator)
+
+        repetitions = detect_repetitions(timeline)
+        timeline = assign_repetitions_to_timeline(timeline, repetitions)
+
+        summaries = summarize_repetitions(timeline, repetitions)
+
+        evaluations = evaluate_repetitions(summaries)
+        consistency_evaluation = evaluate_repetition_consistency(summaries)
+
+        return {
+            "repetitions_count": len(repetitions),
+            "timeline": timeline,
+            "repetitions": repetitions,
+            "summaries": summaries,
+            "evaluations": evaluations,
+            "consistency_evaluation": consistency_evaluation,
+        }
+\end{lstlisting}
+
+Proces analizy rozpoczyna się od wywołania metody \texttt{analyze}, która przyjmuje ścieżkę do pliku wideo. Ścieżka ta nie jest ustawiona na stałe w klasie analizującej, lecz przekazywana z zewnątrz. Ma to znaczenie przy integracji z aplikacją serwerową, ponieważ nagranie pochodzi wtedy z pliku przesłanego przez użytkownika. Dzięki takiemu podejściu ten sam moduł może zostać wykorzystany zarówno z poziomu aplikacji serwerowej, jak i podczas lokalnych testów prowadzonych bez udziału interfejsu użytkownika.
+
+Pierwszym etapem działania metody \texttt{analyze} jest utworzenie osi czasu analizy nagrania. Odpowiada za to funkcja \texttt{analyze\_video}. Funkcja ta przechodzi po kolejnych klatkach filmu, z uwzględnieniem ustalonego kroku analizy, a następnie dla każdej przetwarzanej klatki próbuje wykryć punkty kluczowe sylwetki. Jeżeli sylwetka nie zostanie wykryta, do osi czasu dodawany jest wpis informujący o braku detekcji pozy. Jeżeli detekcja zakończy się powodzeniem, wybierana jest lepiej widoczna strona ciała, obliczane są metryki biomechaniczne oraz wyznaczana jest pozycja sztangi.
+
+Wynikiem tego segmentu pracy systemu jest lista wpisów opisujących kolejne przeanalizowane klatki nagrania. Każdy wpis zawiera w sobie numer klatki, czas nagrania, informację o tym, czy wykryto sylwetkę, wybraną stronę ciała, obliczone metryki, pozycję sztangi oraz punkty kluczowe sylwetki. Przygotowana w ten sposób tablica jest później podstawą dla pozostałych części systemu analizujących wyniki zestawione na osi czasu. Na jej podstawie wykrywane są powtórzenia, przypisywane są fazy ruchu, a następnie przygotowywane są podsumowania potrzebne do oceny techniki.
+
+Po przygotowaniu osi czasu metoda \texttt{analyze} uruchamia funkcję wykrywania powtórzeń \texttt{detect\_repetitions}. Wykryte powtórzenia są następnie przypisywane do odpowiednich fragmentów osi czasu za pomocą funkcji \texttt{assign\_repetitions\_to\_timeline}, dzięki czemu poszczególne klatki mogą zostać powiązane z numerem powtórzenia oraz fazą ruchu. W dalszej kolejności tworzone są podsumowania powtórzeń za pomocą metody \texttt{summarize\_repetitions}, obejmujące między innymi czas trwania ruchu, zakres ruchu sztangi oraz wartości kątów wyznaczonych dla analizowanej strony ciała. Dane te są następnie przekazywane do funkcji \texttt{evaluate\_repetitions} odpowiedzialnej za ocenę pojedynczych powtórzeń oraz \texttt{evaluate\_repetition\_consistency}, odpowiadającej za ocenę spójności całej serii.
+
+Końcowym wynikiem otrzymywanym po wykonaniu wszystkich powyższych funkcji jest struktura danych zawierająca liczbę wykrytych powtórzeń, oś czasu analizy, listę powtórzeń, podsumowania powtórzeń, oceny techniki oraz ocenę spójności serii. W ten sposób podany wynik jest później odbierany przez aplikację serwerową i zwracany użytkownikowi jako wynik analizy. Otrzymany słownik jest potem w prosty sposób konwertowany do formatu JSON i przekazywany do aplikacji klienckiej.
+
+Warto w tym miejscu pracy zaznaczyć raz jeszcze, że na podstawie analizy wymagań użyty jest tu gotowy model estymacji pozy MediaPipe. Wykrywa on kluczowe punkty sylwetki, a następnie program dokonuje analizy zwróconej przez niego tablicy zawierającej współrzędne. Właściwym rezultatem implementacyjnym jest więc połączenie detekcji punktów kluczowych z analizą przebiegu ruchu, wykrywaniem powtórzeń i przygotowaniem wyniku możliwego do zaprezentowania użytkownikowi.
+
+\subsection{Detekcja punktów kluczowych i wyznaczanie metryk biomechanicznych}
+
+Pierwszym etapem właściwej analizy nagrania jest przetworzenie filmu na pojedyncze klatki oraz wykrycie na nich punktów kluczowych sylwetki. W projekcie za iterowanie po klatkach odpowiada funkcja \texttt{iter\_video\_frames}, znajdująca się w katalogu \texttt{utils}. Funkcja ta otwiera plik wideo za pomocą biblioteki OpenCV, a następnie zwraca kolejne klatki wraz z numerem klatki oraz czasem nagrania wyrażonym w sekundach. Analiza nie jest wykonywana dla każdej klatki filmu, lecz z uwzględnieniem parametru \texttt{frame\_stride}. Wartość domyślna tego parametru została określona w pliku \texttt{constants.py} jako stała \texttt{VIDEO\_FRAME\_STRIDE}. Dzięki temu możliwe jest ograniczenie liczby analizowanych klatek, przy zachowaniu informacji o przebiegu ruchu w czasie.
+
+Do wykrywania punktów kluczowych sylwetki wykorzystano klasę \texttt{PoseEstimator}. Klasa ta korzysta z gotowego modelu MediaPipe Pose Landmarker, którego ścieżka została określona w stałej \texttt{MODEL\_PATH}. W konstruktorze klasy tworzony jest obiekt detektora pozy, skonfigurowany do pracy w trybie analizy pojedynczego obrazu. W przypadku analizy filmu oznacza to, że każda wybrana klatka nagrania jest traktowana jako osobny obraz przekazywany do modelu estymacji pozy.
+
+Metoda \texttt{detect\_pose\_from\_frame} przyjmuje klatkę filmu odczytaną przez OpenCV. Ponieważ OpenCV przechowuje obraz w formacie BGR, klatka jest najpierw konwertowana do formatu RGB. Następnie tworzony jest obiekt obrazu zgodny z wymaganiami biblioteki MediaPipe i wykonywana jest detekcja punktów kluczowych. Jeżeli model nie wykryje sylwetki, metoda zwraca wartość \texttt{None}. Taka sytuacja jest później zapisywana w osi czasu analizy jako klatka, dla której nie wykryto pozy ćwiczącego.
+
+W przypadku pomyślnie zakończonej detekcji wynik zwrócony zostaje w postaci słownika. Do każdego punktu kluczowego przyporządkowany jest stały indeks, a w wartości do niego przypisanej znajdują się współrzędne \texttt{x}, \texttt{y}, \texttt{z} oraz wartość \texttt{visibility}. Wartość \texttt{visibility} określa, jak dobrze dany punkt został rozpoznany przez model. Współrzędna \texttt{z} nie jest wykorzystywana w dalszych obliczeniach kątów, ponieważ analiza opiera się na współrzędnych dwuwymiarowych. Na tym etapie zestaw danych liczbowych jest przekazywany do dalszej analizy przez pozostałe moduły programu.
+
+Kolejna część analizy wymaga odwoływania się do konkretnych stawów, takich jak bark, biodro, kolano, kostka czy nadgarstek. Z tego powodu w pliku \texttt{constants.py} zdefiniowano mapowanie nazw punktów na identyfikatory wykorzystywane przez model MediaPipe. Dzięki temu w pozostałych częściach programu można posługiwać się nazwami takimi jak \texttt{left\_hip}, \texttt{right\_knee} czy \texttt{left\_shoulder}, zamiast bezpośrednio odwoływać się do numerów punktów. Takie rozwiązanie zwiększa czytelność kodu i ułatwia późniejsze definiowanie metryk biomechanicznych.
+
+Po wykryciu punktów kluczowych, z racji specyfiki założeń dotyczących położenia kamery obserwującej osobę wykonującą ćwiczenie, wybierana jest strona ciała wykorzystywana do dalszej analizy. Dla punktów objętych analizą, znajdujących się po obu stronach sylwetki, obliczany jest średni wynik widoczności. Następnie wybierana jest strona o pewniejszym poziomie \texttt{visibility}. Z powodu przyjęcia założenia polegającego na statycznym umiejscowieniu kamery, potrzebne jest określenie lepiej widocznej strony w perspektywie bocznej, aby to jej używać jako głównego wyznacznika techniki wykonania ćwiczenia, unikając w ten sposób wahań odczytanych wartości. Dla pewności, w przypadku remisu, domyślną stroną jest strona lewa, aczkolwiek jeśli analizowany film spełnia wymagania specyfikacji nagrania, parametr \texttt{visibility} jednej strony zawsze powinien być wyraźnie wyższy od drugiej.
+
+Następnym krokiem jest obliczenie kątów pomiędzy wybranymi punktami sylwetki. Za tę część działalności programu odpowiada plik o nazwie \texttt{angle\_calculation.py}. Funkcja \texttt{calculate\_angle\_from\_points} oblicza kąt utworzony przez trzy punkty na płaszczyźnie dwuwymiarowej. Standardowo traktowany jest punkt środkowy jako wierzchołek kąta. Obliczenie wykonywane jest na podstawie współrzędnych \texttt{x} oraz \texttt{y}. Wyznaczane są dwa wektory, ich długości, iloczyn skalarny oraz wartość cosinusa kąta. Następnie wynik jest przeliczany z radianów na stopnie. W kodzie znajdują się również zabezpieczenia przed wykonaniem dzielenia przez zero oraz wystąpieniem błędu numerycznego przez użycie wartości cosinusa spoza zakresu od \texttt{-1} do \texttt{1}.
+
+Na podstawie funkcji obliczającej kąt dla trzech punktów zbudowano funkcję o nazwie \texttt{calculate\_angle\_from\_joints}. Przyjmuje ona nazwy trzech stawów, pobiera odpowiadające im współrzędne i przekazuje je do funkcji liczącej kąt. Takie rozwiązanie pozwala definiować kąty w sposób bardziej czytelny, ponieważ w kodzie można wskazać nazwy stawów zamiast ręcznie pobierać współrzędne poszczególnych punktów.
+
+Główne metryki biomechaniczne dla wybranej strony ciała są obliczane przez funkcję \texttt{calculate\_single\_side\_biomechanical\_metrics}. W pierwszej kolejności wyznaczane są kąty opisane w stałej \texttt{SINGLE\_SIDE\_ANGLE\_DEFINITIONS}. W obecnej wersji systemu są to kąty: \texttt{knee\_angle}, \texttt{hip\_angle} oraz \texttt{shoulder\_angle}. Definicje te określają, które trzy punkty sylwetki mają zostać użyte do obliczenia danego kąta. Przykładowo kąt kolana wyznaczany jest na podstawie biodra, kolana i kostki po wybranej stronie ciała.
+
+Oprócz kątów stawowych obliczany jest również kąt pochylenia tułowia, zapisany jako \texttt{back\_inclination\_angle}. Metryka ta jest dodawana do słownika wynikowego razem z pozostałymi kątami. W przypadku, gdy dla danego kąta lub metryki nie uda się wykonać obliczenia, do wyniku przypisywana jest wartość \texttt{None}. Dzięki temu system może kontynuować analizę kolejnych klatek, nawet jeżeli dla jednej z nich część danych nie została poprawnie wyznaczona.
+
+W analizie uwzględniono również pozycję środka gryfu sztangi. Nie jest ona wykrywana jako osobny obiekt na obrazie, lecz liczona na podstawie przybliżonej pozycji środka między nadgarstkami. Jest to jedyna metryka, do liczenia której używane są pozycje stawów z obu stron ciała. Za określenie podanej pozycji odpowiada funkcja \texttt{calculate\_bar\_position}, która zwraca środek pomiędzy lewym i prawym nadgarstkiem. Takie przybliżenie jest dopuszczalne ze względu na charakter ćwiczenia, w którym dłonie są trzymane symetrycznie względem środka sztangi, co pokrywa się ze środkiem pomiędzy nadgarstkami.
+
+Wszystkie opisane elementy są łączone w funkcji \texttt{analyze\_video}. Dla każdej analizowanej klatki funkcja ta próbuje wykryć punkty kluczowe sylwetki, wybiera lepiej widoczną stronę ciała, oblicza metryki biomechaniczne oraz wyznacza przybliżoną pozycję sztangi. Wynikiem działania funkcji jest oś czasu analizy, w której każda przetworzona klatka posiada przypisane informacje o detekcji pozy, wybranej stronie ciała, obliczonych metrykach, położeniu sztangi oraz punktach kluczowych sylwetki. Tak przygotowane dane stanowią podstawę dla dalszych etapów systemu.
+
+W celu ułatwienia interpretacji danych zapisywanych w osi czasu analizy, w tabeli~\ref{tab:znaczenie-parametrow-osi-czasu} przedstawiono znaczenie najważniejszych parametrów wykorzystywanych w dalszej części programu.
+
+\begin{table}[H]
+\centering
+\caption{Znaczenie parametrów zapisywanych w osi czasu analizy. Źródło: opracowanie własne.}
+\label{tab:znaczenie-parametrow-osi-czasu}
+\vspace{0.3cm}
+\small
+\begin{tabular}{p{4cm}p{10cm}}
+\toprule
+\textbf{Parametr} & \textbf{Znaczenie} \\
+\midrule
+\texttt{Klatka} & Numer klatki nagrania analizowanej przez system. \\
+
+\texttt{Czas [s]} & Czas odpowiadający danej klatce, wyrażony w sekundach od początku nagrania. \\
+
+\texttt{Poza} & Informacja określająca, czy dla danej klatki wykryto sylwetkę ćwiczącego. \\
+
+\texttt{Strona} & Strona ciała wybrana do dalszej analizy na podstawie widoczności punktów kluczowych. \\
+
+\texttt{knee\_angle} & Kąt w stawie kolanowym, liczony na podstawie położenia biodra, kolana i kostki po wybranej stronie ciała. \\
+
+\texttt{hip\_angle} & Kąt w stawie biodrowym, liczony na podstawie położenia barku, biodra i kolana po wybranej stronie ciała. \\
+
+\texttt{shoulder\_angle} & Kąt w stawie barkowym, liczony na podstawie położenia biodra, barku i nadgarstka po wybranej stronie ciała. \\
+
+\texttt{back\_inclination} & Kąt pochylenia tułowia względem pionu, liczony na podstawie położenia barku i biodra po wybranej stronie ciała. \\
+
+\texttt{bar\_x} & Przybliżona pozioma współrzędna środka gryfu sztangi, wyznaczana na podstawie położenia nadgarstków. \\
+
+\texttt{bar\_y} & Przybliżona pionowa współrzędna środka gryfu sztangi, wyznaczana na podstawie położenia nadgarstków. \\
+
+\texttt{bar\_visibility} & Średnia wartość widoczności lewego i prawego nadgarstka, używana pomocniczo przy przybliżaniu pozycji środka gryfu sztangi. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+Przykładowe wpisy osi czasu analizy, utworzone po przetworzeniu kolejnych klatek nagrania, przedstawiono w tabeli~\ref{tab:przykladowe-wpisy-osi-czasu}.
+
+\begin{table}[H]
+\centering
+\caption{Przykładowe wpisy osi czasu analizy dla kolejnych klatek nagrania, pochodzące ze środkowej fazy ruchu. Źródło: opracowanie własne.}
+\label{tab:przykladowe-wpisy-osi-czasu}
+\scriptsize
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{ccccrrrrrrr}
+\toprule
+\textbf{Klatka} &
+\textbf{Czas [s]} &
+\textbf{Poza} &
+\textbf{Strona} &
+\textbf{\texttt{knee\_angle}} &
+\textbf{\texttt{hip\_angle}} &
+\textbf{\texttt{shoulder\_angle}} &
+\textbf{\texttt{back\_inclination}} &
+\textbf{\texttt{bar\_x}} &
+\textbf{\texttt{bar\_y}} &
+\textbf{\texttt{bar\_visibility}} \\
+\midrule
+40 & 1{,}33 & tak & left & 82{,}89 & 28{,}94 & 63{,}72 & 82{,}96 & 0{,}50 & 0{,}68 & 0{,}45 \\
+44 & 1{,}47 & tak & left & 108{,}28 & 42{,}40 & 58{,}69 & 79{,}97 & 0{,}50 & 0{,}66 & 0{,}42 \\
+48 & 1{,}60 & tak & left & 120{,}34 & 59{,}30 & 51{,}92 & 71{,}78 & 0{,}50 & 0{,}64 & 0{,}11 \\
+52 & 1{,}73 & tak & left & 145{,}80 & 90{,}70 & 41{,}47 & 59{,}75 & 0{,}50 & 0{,}60 & 0{,}16 \\
+56 & 1{,}87 & tak & left & 156{,}09 & 123{,}38 & 30{,}51 & 42{,}04 & 0{,}50 & 0{,}58 & 0{,}25 \\
+60 & 2{,}00 & tak & left & 174{,}38 & 169{,}59 & 20{,}59 & 15{,}76 & 0{,}49 & 0{,}57 & 0{,}14 \\
+64 & 2{,}13 & tak & left & 170{,}24 & 170{,}94 & 19{,}10 & 7{,}13 & 0{,}48 & 0{,}57 & 0{,}22 \\
+68 & 2{,}27 & tak & left & 177{,}92 & 161{,}81 & 15{,}46 & 1{,}78 & 0{,}47 & 0{,}56 & 0{,}28 \\
+72 & 2{,}40 & tak & left & 175{,}96 & 161{,}30 & 15{,}53 & 1{,}10 & 0{,}48 & 0{,}57 & 0{,}21 \\
+76 & 2{,}53 & tak & left & 179{,}24 & 160{,}83 & 16{,}00 & 2{,}28 & 0{,}47 & 0{,}57 & 0{,}20 \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+Wartości przedstawione w tabeli pokazują zmianę parametrów w trakcie przechodzenia z dolnej części ruchu do pozycji wyprostu. Widoczny jest wzrost wartości kątów \texttt{knee\_angle} oraz \texttt{hip\_angle}, co odpowiada prostowaniu kończyn dolnych i bioder w czasie podnoszenia ciężaru. Jednocześnie należy zwrócić uwagę na relatywnie niskie wartości parametru \texttt{bar\_visibility}. Nie oznaczają one jednak niezależnej pewności wykrycia sztangi, ponieważ system nie rozpoznaje gryfu jako osobnego obiektu. Wartość ta jest obliczana na podstawie widoczności nadgarstków, które w nagraniu z perspektywy bocznej mogą być częściowo zasłonięte przez ciało, sztangę lub talerze. Z tego powodu pozycja sztangi traktowana jest w systemie jako przybliżenie, a nie jako wynik osobnej detekcji obiektu.
+
+\subsection{Wykrywanie powtórzeń i przypisywanie faz ruchu}
+
+Po przygotowaniu osi czasu analizy możliwe jest przejście do kolejnego etapu przetwarzania, czyli wykrycia pojedynczych powtórzeń martwego ciągu. Za tę część działania systemu odpowiada moduł \texttt{repetition\_detection.py}, w którym zaimplementowano funkcje odpowiedzialne za wykrywanie powtórzeń oraz przypisywanie faz ruchu do osi czasu analizy. Na tym etapie system nie korzysta już bezpośrednio z obrazu wideo, lecz z danych liczbowych wyznaczonych podczas analizy kolejnych klatek. Podstawową informacją wykorzystywaną do określenia przebiegu powtórzenia jest pionowa pozycja sztangi, przybliżona wcześniej na podstawie położenia nadgarstków.
+
+W pierwszej kolejności z osi czasu wybierane są wpisy z wykrytą sylwetką ćwiczącego oraz pozycją sztangi. Istotne jest pominięcie klatek bez poprawnej detekcji, ponieważ brak danych uniemożliwia określenie przebiegu ruchu w zadowalającym stopniu pewności. W efekcie dalsza analiza opiera się na danych możliwych do wykorzystania z punktu widzenia wymagań dotyczących spójności wyniku.
+
+Dla każdego poprawnego wpisu zapisywany jest numer klatki, czas nagrania oraz pionowa współrzędna środka sztangi. Wartość ta jest następnie wykorzystywana do odtworzenia przebiegu ruchu w czasie. Tutaj należy zaznaczyć, że w układzie współrzędnych, który jest wynikiem uprzedniej analizy, dla \texttt{bar\_y} większa wartość oznacza niższe położenie, \texttt{0} znajduje się na górnej krawędzi, a \texttt{1} na dolnej.
+
+Ponieważ pozycja sztangi jest wyznaczana pośrednio na podstawie punktów kluczowych sylwetki, jej wartości mogą podlegać niewielkim wahaniom pomiędzy kolejnymi klatkami\cite{wade2022markerless,mundt2024twodimensional}.. Z tego względu przed wykrywaniem powtórzeń wykonywane jest wygładzenie przebiegu pionowej pozycji sztangi. Wygładzenie polega na obliczeniu średniej wartości \texttt{bar\_y} w niewielkim oknie obejmującym analizowaną klatkę oraz sąsiadujące z nią wpisy. Pozwala to ograniczyć wpływ pojedynczych odchyleń pomiaru, które mogłyby prowadzić do błędnego wykrycia minimum lub maksimum lokalnego.
+
+Następnie na wygładzonym przebiegu ruchu wyszukiwane są ekstrema lokalne. W kontekście martwego ciągu maksimum lokalne współrzędnej \texttt{bar\_y} odpowiada dolnemu położeniu sztangi, a minimum lokalne odpowiada jej położeniu górnemu. Dla każdego analizowanego punktu sprawdzane jest więc, czy jego wartość jest większa lub mniejsza od wartości znajdujących się w określonym sąsiedztwie. Wielkość tego sąsiedztwa została zdefiniowana jako stała konfiguracyjna, dzięki czemu możliwe jest dostosowanie czułości detekcji do charakteru analizowanego nagrania.
+
+Wykrycie pojedynczego powtórzenia opiera się na sekwencji trzech kolejnych ekstremów: dolnego położenia sztangi, górnego położenia sztangi oraz ponownego dolnego położenia sztangi. Taki układ odpowiada pełnemu przebiegowi jednego powtórzenia martwego ciągu, obejmującemu fazę podnoszenia ciężaru oraz fazę jego opuszczania. Jeżeli kolejne ekstrema nie tworzą takiej sekwencji, są pomijane, a algorytm przechodzi do dalszych punktów przebiegu.
+
+Przykładowy przebieg pionowej pozycji środka gryfu sztangi w czasie przedstawiono na rysunku~\ref{fig:wykres-zmiana-gryfu}. Widoczne na wykresie zmiany wartości \texttt{bar\_y} odpowiadają kolejnym fazom powtórzeń. Ze względu na układ współrzędnych obrazu spadek wartości \texttt{bar\_y} oznacza ruch sztangi w górę, natomiast wzrost tej wartości oznacza opuszczanie sztangi.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/wykres_zmiana_gryfu.png}
+\caption{Przebieg pionowej pozycji środka gryfu sztangi w czasie. Źródło: opracowanie własne.}
+\label{fig:wykres-zmiana-gryfu}
+\end{figure}
+
+Na rysunku~\ref{fig:wykres-zmiana-gryfu} widoczny jest cykliczny przebieg wartości \texttt{bar\_y}, odpowiadający kolejnym powtórzeniom martwego ciągu. Spadek wartości tej współrzędnej oznacza ruch gryfu w górę, natomiast jej wzrost odpowiada fazie opuszczania ciężaru. Lokalne maksima i minima przebiegu umożliwiają wyznaczenie charakterystycznych punktów powtórzenia, czyli dolnej pozycji, górnej pozycji oraz powrotu do pozycji dolnej. W tym rozdziale wykres służy głównie do przedstawienia sposobu działania implementacji, natomiast szczegółowa ocena poprawności detekcji została omówiona w części poświęconej testom systemu.
+
+
+Wystąpienie sekwencji dolnego, górnego i dolnego położenia sztangi nie świadczy o wykryciu pełnego powtórzenia na badanym fragmencie. Aby to określić, dodatkowo sprawdzany jest pionowy zakres ruchu sztangi oraz czas trwania danego ruchu. Tor ruchu musi przekroczyć minimalną zadaną wartość podczas podnoszenia, jak i opuszczania. Taki warunek eliminuje wahania wynikające z przypadkowych ruchów rąk lub odchyleń położeń będących efektem działania modelu. Bez niego krótkie ruchy rąk mogłyby zostać potraktowane jako osobne powtórzenia. Dodatkowo sprawdzany jest również minimalny czas trwania ruchu, co pełni podobną funkcję, odrzucając zbyt krótkie fragmenty.
+
+Ważnym elementem implementacji jest osobne wyznaczenie początku fazy podnoszenia. Pierwsze dolne ekstremum wskazuje moment, w którym sztanga znajduje się nisko, jednak nie zawsze oznacza dokładny moment rozpoczęcia ruchu w górę. Z tego względu algorytm wyszukuje pierwszą klatkę, w której sztanga przesunęła się w górę o określoną minimalną wartość względem pozycji dolnej. Dopiero ten punkt traktowany jest jako właściwy początek fazy podnoszenia.
+
+Przed fazą podnoszenia ciężaru wyznaczana jest krótka faza przygotowawcza. Obejmuje ona fragment nagrania, gdzie ćwiczący znajduje się w pozycji dolnej, ale nie podnosi jeszcze sztangi, tylko poprawia pozycję ciała i ułożenie sztangi. Etap ten nie służy sam w sobie wykryciu powtórzenia, ale jest przydatny przy późniejszej interpretacji przebiegu całego ćwiczenia.
+
+Dla każdego wykrytego przez system powtórzenia zapisywane są najważniejsze punkty w czasie oraz odpowiadające im numery klatek. Dane punkty to kolejno: początek fazy przygotowania, początek fazy podnoszenia, górna pozycja sztangi oraz koniec fazy opuszczania. Na podstawie różnic w wartościach przypisanych do danych punktów oblicza się czasy poszczególnych okresów ruchu. Dodatkowo zapisywany jest pionowy zakres ruchu sztangi osobno dla fazy podnoszenia i opuszczania.
+
+Po wykryciu powtórzeń następuje przypisanie ich do osi czasu analizy. W implementacji odpowiada za to funkcja \texttt{assign\_repetitions\_to\_timeline}, która uzupełnia wpisy osi czasu o numer powtórzenia oraz nazwę aktualnej fazy ruchu. Każdy wpis osi czasu otrzymuje domyślnie informację, że nie należy do żadnego powtórzenia oraz znajduje się w stanie bezczynności. Następnie dla każdego wykrytego powtórzenia sprawdzany jest numer klatki i na tej podstawie wpisowi przypisywany jest numer powtórzenia oraz jedna z faz ruchu. Klatki od początku przygotowania do początku podnoszenia oznaczane są jako faza przygotowania, klatki od początku podnoszenia do górnej pozycji sztangi jako faza podnoszenia, natomiast klatki od górnej pozycji sztangi do końca opuszczania jako faza opuszczania.
+
+W taki sposób przygotowana oś czasu zostaje rozszerzona o informację dotyczącą przynależności każdej klatki do konkretnego powtórzenia. Jest to istotne dla kolejnego etapu działania systemu, gdzie ocena techniki jest przeprowadzana na podstawie ogółu powtórzenia, a nie pojedynczych klatek analizowanego materiału wideo.
+
+Wynikiem działania tego etapu jest lista wykrytych powtórzeń oraz zaktualizowana oś czasu analizy. Dane te stanowią podstawę do tworzenia podsumowań pojedynczych powtórzeń, w których wartości z wielu klatek zostają przekształcone w zestaw parametrów opisujących całe wykonanie ruchu.
+
+\subsection{Tworzenie podsumowań pojedynczych powtórzeń}
+
+Po wykryciu powtórzeń oraz przypisaniu faz ruchu do osi czasu możliwe jest przygotowanie zbiorczego opisu każdego powtórzenia. Za ten etap działania systemu odpowiada moduł \texttt{repetition\_summary.py}. Jego zadaniem jest przekształcenie danych zapisanych dla wielu klatek w jeden zestaw parametrów opisujących pojedyncze powtórzenie martwego ciągu.
+
+W poprzednim etapie każda klatka mogła zostać przypisana do konkretnego powtórzenia oraz jednej z faz ruchu. Tak przygotowana oś czasu nadal zawiera jednak dane szczegółowe, zapisane osobno dla kolejnych momentów nagrania. Bez dodatkowego przetworzenia trudno byłoby wykorzystać je bezpośrednio do oceny techniki, ponieważ analiza musiałaby być prowadzona na poziomie pojedynczych klatek. Z tego powodu w kolejnym kroku system tworzy podsumowania powtórzeń, w których najważniejsze informacje z całego przebiegu ruchu zostają zebrane w jednej strukturze danych.
+
+Pierwszym etapem tworzenia podsumowania jest wybranie z osi czasu tych wpisów, które należą do analizowanego powtórzenia. Uwzględniane są wyłącznie klatki z poprawnie wykrytą sylwetką oraz dostępnymi metrykami biomechanicznymi. Dzięki temu podsumowanie nie jest tworzone na podstawie pustych lub niepełnych danych. Następnie wybrane wpisy są dzielone zgodnie z przypisaną fazą ruchu na fragment przygotowania, podnoszenia oraz opuszczania.
+
+Podział na fazy umożliwia obliczenie czasu trwania poszczególnych części ruchu. Dla każdej fazy wyznaczany jest czas między pierwszym i ostatnim wpisem należącym do tej fazy. W ten sposób system określa czas przygotowania, czas podnoszenia oraz czas opuszczania. Dodatkowo obliczany jest całkowity czas trwania powtórzenia, liczony od początku fazy podnoszenia do końca fazy opuszczania. Takie podejście pozwala pominąć fragment przygotowania przy wyznaczaniu właściwego czasu ruchu roboczego.
+
+Następnie dla danego powtórzenia analizowane są wartości wybranych metryk biomechanicznych. System pobiera z kolejnych klatek wartości kąta biodra, kąta kolana oraz kąta pochylenia tułowia. Dla każdej z tych metryk wyznaczana jest wartość minimalna, maksymalna oraz zakres zmiany w trakcie całego powtórzenia. Analogicznie analizowana jest pionowa pozycja sztangi, dla której obliczany jest minimalny i maksymalny poziom położenia oraz zakres ruchu.
+
+Zakres zmiany danej metryki jest prostą, ale użyteczną informacją opisującą przebieg ruchu. W przypadku pozycji sztangi pozwala on określić, jak duży był pionowy zakres ruchu w analizowanym powtórzeniu. W przypadku kątów stawowych wskazuje natomiast, jak bardzo zmieniało się ustawienie poszczególnych segmentów ciała podczas wykonania ruchu. Dane te są później wykorzystywane przy ocenie techniki oraz przy porównywaniu powtórzeń między sobą.
+
+Oprócz wartości minimalnych i maksymalnych system zapisuje również wartości metryk w wybranych momentach powtórzenia. Szczególne znaczenie mają początek fazy podnoszenia oraz górna pozycja sztangi. Dla początku podnoszenia zapisywane są między innymi wartości kąta biodra, kąta kolana oraz kąta pochylenia tułowia. Dla pozycji górnej zapisywane są analogiczne wartości, które mogą być później wykorzystane do oceny stopnia wyprostu biodra i kolan.
+
+W module podsumowania uwzględniono również informacje o położeniu wybranych punktów kluczowych w momencie rozpoczęcia podnoszenia. System odczytuje położenie barku oraz biodra po stronie sylwetki wybranej wcześniej do analizy. Na tej podstawie określa, czy bark znajduje się niżej niż biodro w układzie współrzędnych obrazu. Informacja ta może być przydatna przy późniejszej ocenie ustawienia tułowia na początku ruchu.
+
+Wynikiem działania funkcji \texttt{summarize\_repetition} jest słownik zawierający zestaw parametrów opisujących jedno powtórzenie. Obejmuje on między innymi numery i czasy charakterystycznych punktów ruchu, czasy trwania faz, zakres pionowego ruchu sztangi, zmiany kątów oraz wartości wybranych metryk w pozycji początkowej i końcowej. Funkcja \texttt{summarize\_repetitions} wykonuje ten sam proces dla wszystkich wykrytych powtórzeń i zwraca listę ich podsumowań.
+
+Wybrane parametry tworzone w ramach podsumowania pojedynczego powtórzenia przedstawiono w tabeli~\ref{tab:parametry-podsumowania-powtorzenia}.
+
+\begin{table}[H]
+\centering
+\caption{Wybrane parametry podsumowania pojedynczego powtórzenia. Źródło: opracowanie własne.}
+\label{tab:parametry-podsumowania-powtorzenia}
+\vspace{0.3cm}
+\small
+\begin{tabular}{p{5.6cm}p{8.4cm}}
+\toprule
+\addlinespace[0.3em]
+\textbf{Parametr} & \textbf{Znaczenie} \\
+\midrule
+\texttt{rep\_number} & Numer wykrytego powtórzenia w analizowanym nagraniu. \\
+
+\texttt{lifting\_duration\_seconds} & Czas trwania fazy podnoszenia ciężaru, liczony od rozpoczęcia ruchu sztangi w górę do osiągnięcia pozycji górnej. \\
+
+\texttt{lowering\_duration\_seconds} & Czas trwania fazy opuszczania ciężaru, liczony od pozycji górnej do końca opuszczania sztangi. \\
+
+\texttt{duration\_seconds} & Całkowity czas trwania właściwego ruchu w ramach powtórzenia, bez uwzględniania fazy przygotowania. \\
+
+\texttt{bar\_y\_range} & Zakres pionowego ruchu środka gryfu sztangi w analizowanym powtórzeniu. \\
+
+\texttt{hip\_angle\_change} & Różnica pomiędzy maksymalną i minimalną wartością kąta biodra w trakcie powtórzenia. \\
+
+\texttt{knee\_angle\_change} & Różnica pomiędzy maksymalną i minimalną wartością kąta kolana w trakcie powtórzenia. \\
+
+\texttt{back\_angle\_change} & Różnica pomiędzy maksymalną i minimalną wartością kąta pochylenia tułowia w trakcie powtórzenia. \\
+
+\texttt{top\_hip\_angle} & Wartość kąta biodra w górnej pozycji sztangi. \\
+
+\texttt{top\_knee\_angle} & Wartość kąta kolana w górnej pozycji sztangi. \\
+
+\texttt{lifting\_start\_hip\_angle} & Wartość kąta biodra w momencie rozpoczęcia fazy podnoszenia. \\
+
+\texttt{lifting\_start\_knee\_angle} & Wartość kąta kolana w momencie rozpoczęcia fazy podnoszenia. \\
+
+\texttt{shoulder\_below\_hip\_at\_start} & Informacja określająca, czy w momencie rozpoczęcia podnoszenia bark znajduje się niżej niż biodro w układzie współrzędnych obrazu. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+Tak przygotowane podsumowania stanowią warstwę pośrednią pomiędzy analizą klatka po klatce a oceną techniki. Dzięki nim kolejne etapy systemu nie muszą ponownie przetwarzać całej osi czasu nagrania. Zamiast tego mogą korzystać z uporządkowanego zestawu parametrów opisujących każde powtórzenie w jednolity sposób.
+
+\subsection{Ocena techniki wykonania powtórzeń}
+
+Po przygotowaniu podsumowań pojedynczych powtórzeń system przechodzi do etapu oceny techniki. Za tę część odpowiada moduł \texttt{technique\_evaluation.py}. Nie analizuje on już całej osi czasu nagrania, lecz korzysta z wcześniej obliczonych parametrów opisujących każde powtórzenie. Dzięki temu ocena jest wykonywana na bardziej uporządkowanych danych, a nie bezpośrednio na pojedynczych klatkach.
+
+Ocena techniki została oparta na zestawie reguł decyzyjnych. Każda z nich sprawdza jeden wybrany element ruchu, na przykład pozycję końcową, zakres ruchu gryfu albo ustawienie ciała na początku podnoszenia. Takie rozwiązanie jest prostsze od trenowania osobnego modelu klasyfikującego technikę, ale lepiej pasuje do założeń pracy. Pozwala też łatwo wskazać, dlaczego dane powtórzenie zostało ocenione w określony sposób.
+
+Pierwszym elementem poddawanym ocenie jest pozycja końcowa ruchu. W martwym ciągu górna pozycja oznacza wyprost bioder oraz kolan. Z tego powodu system bierze pod uwagę wartości zmiennych \texttt{top\_hip\_angle} oraz \texttt{top\_knee\_angle}. Jeżeli nie mieszczą się one w przyjętych progach, powtórzenie może zostać oznaczone jako wymagające uwagi z powodu niepełnego wyprostu lub przeprostu stawów w pozycji końcowej. System nie ogranicza się do samego wykrycia ruchu gryfu w górę, ale bada też pozycję końcową osoby ćwiczącej.
+
+Kolejnym elementem jest zakres pionowego ruchu gryfu. Parametr \texttt{bar\_y\_range} określa różnicę pomiędzy dolnym i górnym położeniem środka gryfu w danym powtórzeniu. Wartość ta jest porównywana z zakresem typowym dla całej analizowanej serii. Dzięki temu system może wykryć powtórzenia, w których ruch był wyraźnie krótszy niż w pozostałych. Jest to istotne, ponieważ samo osiągnięcie lokalnego minimum i maksimum na wykresie położenia gryfu nie musi jeszcze oznaczać, że zakres ruchu był wystarczający.
+
+Przed właściwą oceną system uzupełnia podsumowania o kontekst całej serii. Wykorzystywana jest między innymi mediana zakresu ruchu gryfu oraz mediana kąta kolana w pozycji startowej. Takie podejście ogranicza wpływ pojedynczych nietypowych powtórzeń na ocenę. Pozwala też porównywać powtórzenia między sobą w obrębie jednego nagrania, zamiast opierać się wyłącznie na stałych wartościach progowych.
+
+Osobno analizowana jest pozycja początkowa powtórzenia. System korzysta tutaj z wartości kątów biodra, kolana oraz pochylenia tułowia wyznaczonych w momencie rozpoczęcia podnoszenia. Celem tego etapu nie jest jednoznaczne uznanie pozycji startowej za poprawną lub błędną. Bardziej istotne jest opisanie, czy dane powtórzenie zaczynało się z pozycji podobnej do pozostałych, czy też ćwiczący rozpoczynał ruch wyraźnie głębiej albo wyżej.
+
+Moduł oceny bierze również pod uwagę relację położenia barku i biodra w momencie rozpoczęcia ruchu. Jeżeli bark znajduje się niżej niż biodro, system zwraca ostrzeżenie dotyczące ustawienia tułowia. W rozwiązaniu nie jest dokładnie badane zachowanie krzywizn kręgosłupa w odcinku lędźwiowym, natomiast takie ułożenie może wskazywać na wykonanie łukowatego zgięcia, które wiąże się z dużym obciążeniem kręgosłupa i jest niepoprawną formą wykonania ćwiczenia. Z racji wykonania analizy na obrazie dwuwymiarowym, ze skupieniem na punktach kluczowych, a nie krzywiznach, system nie jest w stanie z pewnością stwierdzić, że do takiego błędu doszło. Może jednak wskazać dany fragment jako warty dokładnego sprawdzenia przez kompetentną osobę.
+
+Dodatkowo generowane są informacje dotyczące zmiany pochylenia tułowia oraz tempa wykonania powtórzenia. Zmiana pochylenia tułowia wynika z różnicy wartości kąta pleców w trakcie ruchu. Tempo jest natomiast opisane przez czas fazy podnoszenia i czas fazy opuszczania. Parametry te nie muszą same w sobie oznaczać błędu, ale pomagają lepiej opisać przebieg powtórzenia i mogą być przydatne przy porównywaniu kolejnych wykonań.
+
+Każda reguła zwraca odpowiedni komunikat i status. W systemie wyróżnia się trzy statusy: pozytywny, informacyjny oraz ostrzegawczy. Status pozytywny wskazuje, że system nie wykrył żadnych znaczących rozbieżności. Status informacyjny oznacza, że dana informacja nie jest kluczowa w ocenie i powinna być traktowana jako dodatkowa informacja pomocnicza, a nie jako główna ocena poprawności wykonania ćwiczenia. Reguła o statusie ostrzegawczym wskazuje natomiast, że warto skupić uwagę na danym elemencie wykonania, ponieważ wykryta rozbieżność może oznaczać błąd techniczny.
+
+Wybrane reguły wykorzystywane podczas oceny techniki pojedynczego powtórzenia przedstawiono w tabeli~\ref{tab:reguly-oceny-techniki}.
+
+\begin{table}[H]
+\centering
+\caption{Wybrane reguły wykorzystywane podczas oceny techniki powtórzenia. Źródło: opracowanie własne.}
+\label{tab:reguly-oceny-techniki}
+\vspace{0.3cm}
+\footnotesize
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{|p{3.8cm}|p{2.8cm}|p{7.0cm}|}
+\hline
+\textbf{Element oceny} & \textbf{Typ reguły} & \textbf{Znaczenie} \\
+\hline
+
+Wyprost biodra w pozycji końcowej & Oceniająca & Reguła sprawdza wartość parametru \texttt{top\_hip\_angle}. Zbyt niska wartość może wskazywać na brak pełnego wyprostu biodra w końcowej fazie ruchu. \\
+\hline
+
+Wyprost kolan w pozycji końcowej & Oceniająca & Reguła sprawdza wartość parametru \texttt{top\_knee\_angle}. Wynik poza przyjętym zakresem może oznaczać niepełny wyprost lub przeprost kolan. \\
+\hline
+
+Zakres pionowego ruchu gryfu & Oceniająca & Reguła wykorzystuje parametr \texttt{bar\_y\_range}. Pozwala określić, czy zakres ruchu w danym powtórzeniu nie był wyraźnie krótszy niż w pozostałych powtórzeniach serii. \\
+\hline
+
+Pozycja startowa powtórzenia & Informacyjna & Reguła analizuje wartości kątów biodra, kolana oraz pochylenia tułowia w momencie rozpoczęcia podnoszenia. Opisuje ustawienie ciała na początku ruchu. \\
+\hline
+
+Ustawienie barku względem biodra & Ostrzegawcza & Reguła wykorzystuje informację zapisaną w parametrze \texttt{shoulder\_below\_hip\_at\_start}. Może wskazywać na niekorzystne ustawienie tułowia na początku podnoszenia. \\
+\hline
+
+Zmiana pochylenia tułowia & Informacyjna & Reguła opisuje zmianę kąta pochylenia tułowia w trakcie powtórzenia. Informacja ta pomaga określić, jak zmieniało się ustawienie pleców podczas ruchu. \\
+\hline
+
+Tempo wykonania powtórzenia & Informacyjna & Reguła wykorzystuje czas fazy podnoszenia i opuszczania. Parametr ten pozwala lepiej opisać przebieg pojedynczego powtórzenia. \\
+\hline
+
+\end{tabular}
+\end{table}
+
+Na podstawie wybranych reguł określana jest końcowa klasyfikacja powtórzenia. Największe znaczenie mają sprawdzenia dotyczące pełnego wyprostu biodra, pełnego wyprostu kolan oraz zakresu ruchu gryfu. Jeżeli nie wykryto istotnych problemów, powtórzenie otrzymuje status poprawnego. W przypadku pojedynczych nieprawidłowości może zostać oznaczone jako częściowe. Jeżeli liczba istotnych problemów jest większa, system oznacza powtórzenie jako niepoprawne.
+
+Główna funkcja odpowiedzialna za ocenę pojedynczego powtórzenia jest nazwana \texttt{evaluate\_repetition}. Przyjmuje ona podsumowanie jednego powtórzenia i zwraca zestaw komunikatów, ogólny status, klasyfikację powtórzenia oraz powody wpływające na wynik. Funkcja \texttt{evaluate\_repetitions} wykonuje ten proces dla wszystkich powtórzeń w serii. Przed rozpoczęciem oceny uzupełnia ona podsumowania o kontekst serii, a następnie przypisuje wynik do każdego wykrytego powtórzenia.
+
+Wynikiem tego etapu jest lista ocen powtórzeń. Dane te mogą zostać przekazane do aplikacji serwerowej, a następnie wyświetlone użytkownikowi w interfejsie aplikacji. Dzięki temu użytkownik otrzymuje nie tylko informację o liczbie wykrytych powtórzeń, ale również opis jakości ich wykonania oraz wskazanie elementów, które mogą wymagać poprawy.
+
+\subsection{Ocena spójności serii}
+
+Po ocenie pojedynczych powtórzeń system wykonuje jeszcze jeden etap analizy, którego celem jest sprawdzenie spójności całej serii. Za tę część odpowiedzialna jest funkcja \texttt{evaluate\_repetition\_consistency} umieszczona w module \texttt{technique\_evaluation.py}. W przeciwieństwie do poprzedniego etapu nie analizuje ona osobno każdego powtórzenia, lecz porównuje powtórzenia między sobą.
+
+Sama implementacja tego etapu znajduje się w znaczącym stopniu w funkcji pomocniczej o nazwie \texttt{get\_summaries\_for\_consistency}, która wybiera podsumowania używane do porównania serii. Jeżeli dostępna jest wystarczająca liczba powtórzeń oznaczonych jako poprawne, to właśnie one są wykorzystywane w pierwszej kolejności. W przeciwnym przypadku funkcja zwraca wszystkie dostępne podsumowania, aby możliwe było wykonanie oceny również dla mniej jednorodnych nagrań.
+
+Ocena spójności serii ma charakter pomocniczy. Metryka ta nie ma na celu wskazania pojedynczego błędu technicznego, tylko przeanalizowanie ogółu serii pod kątem odchylenia od normy lub większych rozbieżności. W praktyce wykonania ćwiczenia, każda seria będzie zawierać niewielkie różnice wynikające z różnych pozycji startowych, czasu ruchu, poziomu wyprostowania ćwiczącego czy tempa ruchu. Jeżeli jednak te różnice są zbyt duże, system powinien zwrócić informację o braku jednolitego wykonania serii użytkownikowi.
+
+Przed rozpoczęciem porównania system wybiera powtórzenia, które zostaną wykorzystane do oceny spójności. W pierwszej kolejności brane są pod uwagę powtórzenia oznaczone wcześniej jako poprawne. Takie rozwiązanie ogranicza wpływ wyraźnie błędnych lub niepełnych powtórzeń na ocenę całej serii. Jeżeli liczba poprawnych powtórzeń jest zbyt mała, system korzysta ze wszystkich dostępnych podsumowań, aby mimo to możliwe było przygotowanie wyniku.
+
+Pierwszym porównywanym przez program parametrem jest zakres ruchu gryfu sztangi. Przez system obliczana jest różnica pomiędzy maksimum oraz minimum wartości parametru \texttt{bar\_y\_range} występującym w poszczególnych powtórzeniach serii. Na podstawie tej różnicy można uznać że kolejne powtórzenia miały podobny zakres ruchu, czy tez różniły się od siebie w stopniu znaczącym. Duża rozbieżność w zakresie ruchu może oznaczać, że pewna część powtórzeń była wykonana w sposób nie pełny lub w innym położeniu.
+
+Drugim elementem jest czas trwania powtórzeń. W tym przypadku system porównuje wartości parametru \texttt{duration\_seconds}. Różnice czasu wykonania nie muszą od razu oznaczać błędu technicznego, dlatego ten element ma głównie charakter informacyjny. Może jednak pokazać, że tempo serii nie było równe, na przykład gdy jedno z powtórzeń zostało wykonane znacznie wolniej od pozostałych.
+
+Ostatnim porównaniem jest sprawdzenie wartości kątów w pozycji końcowej. System sprawdza różnice dotyczące parametrów \texttt{top\_hip\_angle} oraz \texttt{top\_knee\_angle}. Na podstawie tych wartości możliwe jest określenie, czy ćwiczący konsekwentnie kończył powtórzenia w podobnej pozycji. Duże różnie wskazują na niepoprawną pozycję końcową, wynikającą na przykład z za krótkiego ruchu albo nie stabilnej pozycji w wyproście.
+
+Parametry wykorzystywane podczas oceny spójności serii przedstawiono w tabeli~\ref{tab:parametry-spojnosci-serii}.
+
+\begin{table}[H]
+\centering
+\caption{Parametry wykorzystywane podczas oceny spójności serii. Źródło: opracowanie własne.}
+\label{tab:parametry-spojnosci-serii}
+\vspace{0.3cm}
+\footnotesize
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{|p{3.6cm}|p{6.3cm}|p{3.7cm}|}
+\hline
+\textbf{Parametr} & \textbf{Porównywana wartość} & \textbf{Charakter wyniku} \\
+\hline
+
+\texttt{bar\_y\_range} & Różnica zakresu pionowego ruchu gryfu pomiędzy powtórzeniami w serii. & Oceniający \\
+\hline
+
+\texttt{duration\_seconds} & Różnica czasu trwania powtórzeń, liczona na podstawie czasu ruchu roboczego. & Informacyjny \\
+\hline
+
+\texttt{top\_hip\_angle} & Różnica wartości kąta biodra w górnej pozycji powtórzeń. & Ostrzegawczy \\
+\hline
+
+\texttt{top\_knee\_angle} & Różnica wartości kąta kolana w górnej pozycji powtórzeń. & Ostrzegawczy \\
+\hline
+
+\end{tabular}
+\end{table}
+
+Dla każdego sprawdzanego elementu tworzony jest osobny komunikat. System porównuje obliczone różnice z przyjętymi progami zapisanymi w konfiguracji. Jeżeli wartość różnicy mieści się w dopuszczalnym zakresie, dany element otrzymuje status pozytywny. W przeciwnym przypadku zwracany jest status informacyjny lub ostrzegawczy, zależnie od rodzaju sprawdzanego parametru.
+
+Na wynik oceny spójności całej serii składają się status oraz lista poszczególnych sprawdzeń. W przypadku gdy żaden z elementów nie zwrócił statusu ostrzegawczego, całej ocenie przypisuje się status pozytywny. Jeżeli chociaż jeden z parametrów wyszedł poza przyjęte normy, status całej oceny zostaje oznaczony jako wymagający uwagi.
+
+Ten etap uzupełnia ocenę pojedynczych powtórzeń o szerszy kontekst. Dzięki niemu użytkownik może zobaczyć nie tylko, czy dane powtórzenie zostało wykonane poprawnie, ale również czy cała seria była wykonana w powtarzalny sposób. Jest to przydatne szczególnie przy analizie kilku powtórzeń w jednym nagraniu, ponieważ pozwala zauważyć różnice, które nie zawsze są widoczne przy ocenie każdego powtórzenia osobno.
+
+\subsection{Integracja modułu analizy z aplikacją serwerową}
+
+Po zakończeniu opisu modułu analizy nagrania wideo należy przedstawić sposób jego połączenia z aplikacją serwerową. W projekcie moduł analizy nie został wydzielony jako osobny mikroserwis. Działa on w tym samym środowisku uruchomieniowym co aplikacja serwerowa. Takie rozwiązanie ogranicza liczbę elementów infrastruktury potrzebnych do uruchomienia systemu i jest wystarczające dla zakresu pracy inżynierskiej.
+
+Za integrację części serwerowej z modułem analizy odpowiada \texttt{analysis\_service.py}, znajdujący się w aplikacji backendowej. Pełni on rolę warstwy pośredniej pomiędzy kodem odpowiedzialnym za obsługę żądania użytkownika a właściwym modułem analizy wideo. Dzięki temu widoki aplikacji serwerowej nie muszą bezpośrednio znać szczegółów działania klasy \texttt{DeadliftAnalyzer}. Ich zadaniem jest obsługa przesłanego pliku oraz przekazanie jego ścieżki do odpowiedniej funkcji serwisowej.
+
+W pliku \texttt{analysis\_service.py} wyznaczana jest ścieżka do głównego katalogu projektu oraz do katalogu \texttt{ml\_model}. Następnie katalog ten jest dodawany do listy ścieżek importu Pythona. Pozwala to aplikacji serwerowej korzystać z modułów znajdujących się poza bezpośrednią strukturą aplikacji Django. W ten sposób backend może zaimportować klasę \texttt{DeadliftAnalyzer} bez konieczności kopiowania kodu analizy do katalogu aplikacji serwerowej.
+
+Główna funkcja wykorzystywana w tej warstwie to \texttt{run\_deadlift\_analysis}. Przyjmuje ona ścieżkę do pliku wideo zapisanego po stronie serwera. Następnie tworzy instancję klasy \texttt{DeadliftAnalyzer} i wywołuje analizę dla otrzymanej ścieżki. Oznacza to, że aplikacja serwerowa nie przekazuje do modułu analizy samego pliku wideo w postaci binarnej, lecz lokalizację pliku już zapisanego na dysku.
+
+Przepływ wywołania analizy nagrania z poziomu aplikacji serwerowej przedstawiono na rysunku~\ref{fig:diagram-integracji-modulu-analizy}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/diagram_integracji_modulu_analizy.png}
+\caption{Przepływ wywołania analizy nagrania z poziomu aplikacji serwerowej. Źródło: opracowanie własne.}
+\label{fig:diagram-integracji-modulu-analizy}
+\end{figure}
+
+Na rysunku~\ref{fig:diagram-integracji-modulu-analizy} przedstawiono, że moduł analizy nie działa jako osobny mikroserwis, lecz jest wywoływany bezpośrednio przez warstwę serwisową aplikacji backendowej. Wspólnym punktem integracji jest funkcja \texttt{run\_deadlift\_analysis}, która przekazuje ścieżkę do zapisanego nagrania do klasy \texttt{DeadliftAnalyzer}. Wynik analizy jest następnie przekształcany do formatu możliwego do zapisu w polu \texttt{JSONField}.
+
+Takie podejście upraszcza przepływ danych w systemie. Plik przesłany przez użytkownika jest najpierw obsługiwany przez mechanizmy aplikacji serwerowej, a dopiero później przekazywany do modułu analizy jako zwykła ścieżka systemowa. Moduł analizy może dzięki temu działać podobnie jak niezależna część programu uruchamiana lokalnie, bez konieczności obsługi żądań HTTP, autoryzacji, serializacji danych wejściowych czy komunikacji sieciowej.
+
+Wynik zwracany przez klasę \texttt{DeadliftAnalyzer} ma postać złożonej struktury danych. Zawiera między innymi liczbę wykrytych powtórzeń, oś czasu analizy, listę powtórzeń, podsumowania, oceny techniki oraz ocenę spójności serii. Dane te są potrzebne później do zapisania wyniku analizy oraz do zaprezentowania go użytkownikowi w interfejsie aplikacji.
+
+Przed zapisaniem wyniku konieczne jest jednak przekształcenie go do formatu zgodnego z mechanizmem zapisu danych w aplikacji serwerowej. W tym celu w zawartości pliku \texttt{analysis\_service.py} zaimplementowano funkcję \texttt{make\_json\_serializable}. Jej zadaniem jest przejście przez zwróconą strukturę danych i zamiana wartości, które mogłyby sprawiać problem podczas zapisu w polu typu JSON, na standardowe typy języka Python.
+
+Funkcja \texttt{make\_json\_serializable} obsługuje między innymi słowniki, listy, krotki oraz wartości pochodzące z bibliotek używanych w module analizy. Jeżeli dana wartość posiada metodę \texttt{item}, zostaje zamieniona na zwykły typ liczbowy Pythona. Jest to istotne, ponieważ część obliczeń wykonywanych podczas analizy może zwracać wartości typowe dla bibliotek numerycznych, które nie zawsze mogą zostać bezpośrednio zapisane jako dane JSON.
+
+W obecnej wersji projektu moduł analizy i aplikacja serwerowa działają w ramach jednego procesu aplikacji. Nie zastosowano osobnej usługi odpowiedzialnej wyłącznie za analizę nagrań. Przyjęte rozwiązanie jest prostsze w uruchomieniu i utrzymaniu, ponieważ nie wymaga dodatkowej komunikacji sieciowej, osobnej konfiguracji środowiska ani mechanizmu kolejkowania zadań pomiędzy usługami.
+
+Jednocześnie struktura kodu nie zamyka możliwości późniejszego wydzielenia modułu analizy do osobnej usługi. Wejściem do analizy jest ścieżka do pliku wideo, a wyjściem uporządkowany wynik możliwy do przedstawienia w formacie JSON. Oznacza to, że w przyszłości moduł analizy mógłby zostać uruchamiany jako niezależny komponent, na przykład jako osobny serwis API lub proces roboczy. W ramach pracy inżynierskiej takie rozdzielenie nie było jednak konieczne, ponieważ zwiększyłoby złożoność projektu bez istotnej korzyści dla realizowanego celu.
+
+Dzięki zastosowaniu warstwy serwisowej aplikacja serwerowa pozostaje oddzielona od szczegółów działania algorytmów analizy. Widok odpowiedzialny za obsługę przesłanego nagrania może wywołać jedną funkcję integracyjną i otrzymać gotowy wynik analizy. Takie rozwiązanie poprawia czytelność kodu oraz ułatwia dalszy rozwój projektu, ponieważ zmiany w sposobie działania modułu analizy nie muszą bezpośrednio wpływać na logikę obsługi żądań HTTP.
+
+\subsection{Implementacja aplikacji serwerowej}
+
+Aplikacja serwerowa, określana dalej również jako backend, odpowiada za obsługę żądań wysyłanych z części klienckiej, zapis przesłanego nagrania oraz uruchomienie procesu analizy. W projekcie została ona zaimplementowana z wykorzystaniem Django, czyli szkieletu aplikacyjnego przeznaczonego do tworzenia aplikacji internetowych w języku Python. Backend pełni rolę warstwy pośredniej pomiędzy interfejsem użytkownika a modułem analizy nagrania wideo. Dzięki temu użytkownik nie uruchamia bezpośrednio kodu odpowiedzialnego za analizę ruchu, lecz korzysta z punktów końcowych API udostępnionych przez aplikację serwerową.
+
+Najważniejszym obiektem wchodzącym w skład backendu jest model \texttt{Analysis}. Model ten reprezentuje pojedyncze zlecenie analizy wywołane przez aplikacje kliencką. W definicji obiektu przechowywany jest plik wideo, aktualny status działania analizy,  wynik zwrócony przez system oraz ewentualny komunika błędu jeśli taki by wystąpił. Dodatkowo zapisywane są punkty w czasie odpowiadające utworzeniu rekordu, rozpoczęciu analizy oraz jej zakończeniu. Zaprojektowana w ten sposób struktura danych pozwala przechowywać w jednym miejscu zarówno dane wejściowe, jak wynik analizy dokonanej przez system
+
+Przesłane nagranie nie jest zapisywane w całości w bazie danych jako pliku, pole \texttt{video} jest typu plikowe, przechowuje one informacje o ścieżce dostępu do pliku na dysku twardym serwera. Sama ta informacja jest wystarczająca do wykonania oceny przez moduł analizy, a przechowywanie nagrania w całości w bazie danych nie było by optymalnym rozwiązaniem wypełniającym wymagania systemowe, z racji faktu że silniki baz danych są fundamentalnie zoptymalizowane pod katem wyszukiwania obiektów tekstowych i liczbowych a nie dużych obiektów binarnych, takich jak plik wideo.
+
+Model \texttt{Analysis} wykorzystuje kilka statusów opisujących aktualny stan analizy. Status \texttt{PENDING} oznacza, że rekord został utworzony, ale analiza nie została jeszcze rozpoczęta. Status \texttt{PROCESSING} informuje, że system przetwarza przesłany materiał. Po poprawnym zakończeniu analizy ustawiany jest status \texttt{COMPLETED}. Jeżeli podczas przetwarzania wystąpi błąd, rekord otrzymuje status \texttt{FAILED}, a szczegóły problemu zapisywane są w polu \texttt{error\_message}.
+
+Przepływ zmian statusu rekordu analizy przedstawiono na rysunku~\ref{fig:diagram-stanow-analizy}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth]{figures/diagram_stanow_rekordow.png}
+\caption{Diagram stanów rekordu analizy w aplikacji serwerowej. Źródło: opracowanie własne.}
+\label{fig:diagram-stanow-analizy}
+\end{figure}
+
+Wynik analizy przechowywany jest w polu \texttt{result}. Zastosowanie pola typu JSON pozwala zapisać złożoną strukturę danych zwracaną przez moduł analizy. W wyniku znajdują się między innymi liczba wykrytych powtórzeń, oś czasu analizy, podsumowania powtórzeń, oceny techniki oraz ocena spójności serii. Takie rozwiązanie jest wygodne w przypadku danych o zmiennej strukturze, ponieważ nie wymaga tworzenia osobnych tabel dla każdego fragmentu wyniku.
+
+Za przekształcenie obiektu modelu do postaci możliwej do zwrócenia w odpowiedzi HTTP odpowiada serializer, czyli komponent odpowiedzialny za zamianę danych aplikacji na format przesyłany w odpowiedzi API oraz za walidację danych wejściowych. W projekcie funkcję tę pełni klasa \texttt{AnalysisSerializer}. Udostępnia ona podstawowe pola modelu oraz dodatkowe informacje pomocnicze, takie jak nazwa przesłanego pliku i czas trwania analizy. Część pól została oznaczona jako tylko do odczytu, ponieważ nie powinna być ustawiana bezpośrednio przez użytkownika. Dotyczy to między innymi statusu, wyniku analizy, komunikatu błędu oraz znaczników czasu.
+
+Głównym widokiem odpowiedzialnym za rozpoczęcie analizy jest funkcja o nazwie \texttt{create\_analysis}. Przyjmuje ona żądanie zawierające plik wideo przesłany przez użytkownika. W pierwszej kolejności dane wejściowe są walidowane z użyciem serializera. Jeżeli przesłany plik spełnia wymagania, tworzony jest nowy rekord modelu \texttt{Analysis} ze statusem \texttt{PENDING}. Następnie status zostaje zmieniony na \texttt{PROCESSING}, a w polu \texttt{started\_at} zapisywany jest czas rozpoczęcia przetwarzania.
+
+Po przygotowaniu rekordu widok wywołuje funkcję \texttt{run\_deadlift\_analysis}, przekazując do niej ścieżkę do zapisanego pliku wideo. Funkcja ta uruchamia moduł analizy opisany w poprzednich podrozdziałach i zwraca wynik w postaci struktury danych możliwej do zapisania w polu \texttt{result}. Po zakończeniu analizy wynik zostaje przypisany do rekordu, status zmieniany jest na \texttt{COMPLETED}, a czas zakończenia zapisywany jest w polu \texttt{completed\_at}.
+
+Widok \texttt{create\_analysis} został również zaopatrzony w mechanizm obsługi błędów. Jeżeli podczas analizy doszło by do wyjątku, system dokonuje zmiany statusu rekordu na \texttt{FAILED}, po czym zapisuje treść zwróconego błędu w polu \texttt{error\_message} oraz na koniec ustawia czas zakończenia przetwarzania. Dzięki wykonaniu tego algorytmu informacja o niepowodzeniu nie jest tracona oraz aplikacja kliencka może otrzymać odpowiedź zawierającą status analizy oraz tekst opisujący błąd.
+
+Drugim istotnym widokiem jest funkcja \texttt{get\_analysis}. Jej zadaniem jest pobranie istniejącego rekordu analizy na podstawie identyfikatora. Jeżeli rekord zostanie znaleziony, widok zwraca jego dane w formacie JSON. W przypadku braku rekordu o podanym identyfikatorze zwracana jest odpowiedź informująca o nieznalezieniu zasobu. Funkcja ta może być wykorzystana do ponownego odczytania wyniku analizy bez konieczności ponownego przesyłania nagrania.
+
+W obecnej implementacji analiza uruchamiana jest synchronicznie w ramach obsługi żądania HTTP. Oznacza to, że po przesłaniu nagrania backend wykonuje analizę i dopiero po jej zakończeniu zwraca odpowiedź do klienta. Takie rozwiązanie jest proste i wystarczające dla zakresu projektu, ponieważ nie wymaga dodatkowej kolejki zadań ani osobnego procesu roboczego. W przypadku dalszego rozwoju systemu możliwe byłoby przeniesienie analizy do zadania wykonywanego asynchronicznie, aby lepiej obsługiwać dłuższe nagrania lub większą liczbę użytkowników.
+
+Implementacja aplikacji serwerowej łączy obsługę żądań HTTP z uruchomieniem analizy nagrania oraz zapisem jej wyniku. Dzięki wykorzystaniu modelu \texttt{Analysis}, serializera \texttt{AnalysisSerializer} oraz wydzielonej warstwy serwisowej kod aplikacji serwerowej pozostaje uporządkowany, a logika obsługi żądań jest oddzielona od szczegółów działania modułu analizy wideo.
+
+\subsection{Implementacja aplikacji klienckiej}
+
+Aplikacja kliencka, określana dalej również jako frontend, odpowiada za część systemu widoczną dla użytkownika. Jej głównym zadaniem jest umożliwienie przesłania nagrania wideo, uruchomienie analizy oraz przedstawienie użytkownikowi informacji zwróconych przez aplikację serwerową. W projekcie frontend został zaimplementowany z wykorzystaniem biblioteki React, która pozwala budować interfejs użytkownika z mniejszych, niezależnych fragmentów nazywanych komponentami.
+
+Pod nazwą komponent kryje się wydzielona część interfejsu odpowiedzialna za określony, często powtarzający się , fragment widoku lub logiki prezentacji danych. Podejście do tworzenia aplikacji klienckiej z użyciem komponentów pozwala na dobrą strukturyzacje kodu, zapewniająca rozdzielenie poszczególnych elementów aplikacji, na przykład formularza przesyłania pliku, instrukcji dla użytkownika oraz widoku wyników analizy. Zapewnia to możliwość indywidualnego podejścia do każdej części systemu oraz wygodnego wielokrotnego wywoływania tego samego fragmentu widoku. 
+
+Strukturę najważniejszych elementów aplikacji klienckiej przedstawiono na rysunku~\ref{fig:diagram-struktury-frontendu}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth]{figures/diagram_komponentow.png}
+\caption{Struktura głównych elementów aplikacji klienckiej. Źródło: opracowanie własne.}
+\label{fig:diagram-struktury-frontendu}
+\end{figure}
+
+Na rysunku~\ref{fig:diagram-struktury-frontendu} pokazano, że głównym elementem aplikacji klienckiej jest komponent \texttt{App.jsx}, który przechowuje stan aplikacji i przekazuje dane do pozostałych komponentów. Komponent \texttt{FileUploadCard} odpowiada za wybór i podstawową walidację pliku, natomiast komunikacja z aplikacją serwerową została wydzielona do pliku \texttt{analysisApi.js}. Wartości wspólne dla kilku elementów interfejsu zapisano w pliku \texttt{constants.js}.
+
+Głównym plikiem aplikacji klienckiej jest \texttt{App.jsx}. Przechowuje on podstawowy stan aplikacji, w którym to z kolei znajdują sie informacje na temat, wybranego pliku wideo, wyniku analizy informacji o trwającym obecnie przetwarzaniu oraz ewentualne komunikaty błędu. Jak wynika z nazwy React stawia na reaktywność i elastyczność działania do tego stosowany jest mechanizm stanu udostępniony w kodzie biblioteki. Dzięki stanowi zmiana wybranego pliku, rozpoczęcie analizy, zakończenie analizy albo otrzymanie wyniku z backendu powodują automatyczne odświeżenie odpowiednich fragmentów kodu oflagowanych jako te reagujące na zmiany stanu.
+
+Obsługa wyboru pliku została wydzielona do komponentu \texttt{FileUploadCard}. Komponent ten odpowiada za wyświetlenie formularza przesyłania nagrania oraz za podstawową walidację pliku po stronie przeglądarki. W pierwszej kolejności sprawdzane jest, czy użytkownik rzeczywiście wskazał plik. Następnie weryfikowany jest jego typ, ponieważ system powinien przyjmować wyłącznie pliki wideo. Dodatkowo sprawdzany jest maksymalny rozmiar pliku, określony w stałych konfiguracyjnych aplikacji.
+
+W przypadku wybrania nieprawidłowego pliku komponent przekazuje do głównego widoku odpowiedni komunikat błędu. Dzięki temu użytkownik otrzymuje informację jeszcze przed wysłaniem żądania do backendu. Takie rozwiązanie nie zastępuje walidacji po stronie aplikacji serwerowej, ale poprawia wygodę korzystania z systemu i ogranicza liczbę błędnych żądań wysyłanych do API.
+
+Kluczowym pod kątem utrzymania czystości kodu, było wyniesienie podstawowych wartości konfiguracyjnych oraz tekstów wyświetlanych na interfejsie do oddzielnego pliku \texttt{constants.js}. Zdefiniowano tam między innymi takie stałe jak: adres API, maksymalny rozmiar przesyłanego pliku, obsługiwane formaty nagrań, etykiety statusów oraz komunikaty błędów. Taka implementacja ogranicza redundancje definiowania re-używalnych stałych i pozwala na zmiany w obrębie całej aplikacji poprzez zmianę wartości stałej tylko w jednym miejscu.
+
+Za obsługę komunikacji strony klienckiej z aplikacją serwerową odpowiada funkcja o nazwie \texttt{uploadVideoForAnalysis}, znajdująca się w pliku \texttt{analysisApi.js}. Funkcja ta rozpoczyna od utworzenia obiektu \texttt{FormData}. Dalej skupia się na dodaniu do niego pliku wideo jako parametr pod nazwą \texttt{video}. Na koniec wysyła żądanie typu \texttt{POST} do przystosowanego to tego typu formy danych punktu końcowego interfejsu API. Zastosowanie tej metody komunikacji i przesyłania plików przez formularz internetowy, spełnia standardy nowoczesnych implementacji aplikacji sieciowych  oraz pozwala uniknąć przekształceniu pliku do innej postaci. 
+
+W komponencie \texttt{App.jsx} wysłanie formularza obsługiwane jest przez \texttt{handleSubmit}. Przed rozpoczęciem komunikacji z backendem przez funkcje sprawdzane jest, czy użytkownik wybrał plik. Jeżeli plik nie został wskazany, w interfejsie ustawiany jest komunikat błędu. W przeciwnym przypadku aplikacja ustawia stan ładowania, usuwa wcześniejszy komunikat błędu oraz czyści poprzedni wynik analizy. Następnie wywoływana jest funkcja \texttt{uploadVideoForAnalysis}.
+
+Po otrzymaniu poprawnej odpowiedzi z backendu wynik analizy zostaje zapisany w stanie aplikacji. Jeżeli podczas wysyłania żądania albo wykonywania analizy wystąpi błąd, komunikat zwrócony przez aplikację serwerową zostaje przechwycony i wyświetlony użytkownikowi. Niezależnie od wyniku operacji, po zakończeniu żądania stan ładowania jest wyłączany. Dzięki temu interfejs może pokazać użytkownikowi, czy analiza nadal trwa, czy też zakończyła się powodzeniem albo błędem.
+
+W aplikacji klienckiej przygotowano również komponent \texttt{InstructionCard}, którego zadaniem jest przekazanie użytkownikowi podstawowych informacji o sposobie przygotowania nagrania. Wskazówki dotyczą między innymi ustawienia kamery z boku, objęcia w kadrze całej sylwetki oraz nagrania pełnej serii ćwiczenia. Ten element nie wpływa bezpośrednio na działanie algorytmu, ale ma znaczenie praktyczne, ponieważ jakość nagrania wpływa na możliwość poprawnego wykrycia punktów kluczowych i późniejszej oceny techniki.
+
+Widok aplikacji klienckiej przed przesłaniem nagrania przedstawiono na rysunku~\ref{fig:widok-poczatkowy-aplikacji}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{figures/obraz_naglowek.png}
+\caption{Widok początkowy aplikacji klienckiej przed przesłaniem nagrania. Źródło: opracowanie własne.}
+\label{fig:widok-poczatkowy-aplikacji}
+\end{figure}
+
+Na rysunku~\ref{fig:widok-poczatkowy-aplikacji} pokazano formularz przesyłania pliku oraz instrukcje przygotowania nagrania. Elementy te odpowiadają za zebranie danych wejściowych od użytkownika przed rozpoczęciem analizy.
+
+Po wykonaniu analizy komponent główny przekazuje otrzymane dane do komponentu \texttt{AnalysisResults}. W tym podrozdziale istotne jest przede wszystkim to, że frontend nie wykonuje obliczeń biomechanicznych samodzielnie. Jego zadaniem jest zebranie danych wejściowych od użytkownika, wysłanie ich do aplikacji serwerowej oraz obsługa odpowiedzi. Szczegółowy sposób prezentacji wyników analizy został opisany w kolejnym podrozdziale.
+
+Implementacja aplikacji klienckiej została więc oparta na prostym przepływie interakcji. Użytkownik wybiera plik wideo, aplikacja sprawdza podstawowe wymagania, wysyła nagranie do backendu, a następnie zapisuje zwrócony wynik w stanie aplikacji. W ten sposób dokonany podział pozwala jasno oddzieli warstwę interfejsu użytkownika. 
+
+\subsection{Prezentacja wyników analizy w interfejsie użytkownika}
+
+W momencie zakończenia analizy nagrania przez stronę serwerową aplikacja kliencka otrzymuje odpowiedź i zapisuje ją w stanie komponentu głównego. Dalej otrzymane dane są przekazywane do komponentu \texttt{AnalysisResults}, który odpowiada za samo zaprezentowanie wyników analizy użytkownikowi. Aplikacja kliencka nie wykonuje już żadnych dodatkowych obliczeń biomechanicznych, opiera się ona czysto na danych zapewnionych przez backend systemu.
+
+Widok wyników został zaprojektowany w taki sposób, aby użytkownik mógł najpierw zobaczyć najważniejsze informacje, a dopiero później przejść do szczegółów. Na początku prezentowana jest sekcja wyników analizy wraz z nazwą przesłanego pliku. Pozwala to jednoznacznie powiązać wyświetlone informacje z nagraniem, które zostało poddane analizie. Jest to szczególnie istotne w przypadku testowania systemu na wielu różnych plikach wideo.
+
+Główną częścią widoku jest lista ocen poszczególnych powtórzeń. Każde powtórzenie prezentowane jest osobno za pomocą komponentu \texttt{RepetitionCard}. Taki podział sprawia, że użytkownik nie otrzymuje jednego zbiorczego komunikatu dla całego nagrania, ale może przeanalizować wynik każdego wykrytego powtórzenia oddzielnie. Jest to zgodne z założeniem systemu, ponieważ błędy techniczne mogą występować tylko w części serii.
+
+Widok wyników analizy po zakończeniu przetwarzania nagrania przedstawiono na rysunku~\ref{fig:widok-wynikow-analizy}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{figures/obraz_wyniki.png}
+\caption{Widok wyników analizy w aplikacji klienckiej. Źródło: opracowanie własne.}
+\label{fig:widok-wynikow-analizy}
+\end{figure}
+
+Na rysunku~\ref{fig:widok-wynikow-analizy} widoczny jest główny widok wyników analizy. Wyniki zostały podzielone na osobne karty powtórzeń z odpowiadającymi statusami. 
+
+Każde powtórzenie ma odpowiadającą mu kartę, na karcie wyświetlany jest numer powtórzenia oraz jego ogólny status. Status określany jest na podstawie wyniku funkcji pomocniczej \texttt{getRepetitionDisplayStatus}. W przypadku gdy powtórzenie jest określone jako niepoprawne albo częściowe, wyświetlane jest to użytkownikowi skupiając się przede wszystkim na ogólnym statusie, a nie wyniku poszczególnych statusów pod rzędnych.
+
+Do prezentacji szczegółowych statusów wskaźników wykorzystano komponent o nazwie \texttt{StatusBadge}. Zadaniem tego komponentu jest przedstawienie statusu danego parametru w powtarzalnej, jednolitej formie wizualnej na przestrzeni różnych części interfejsu. Do poboru wartości etykiety określającej status poprawności danego wskaźnika, komponent wykorzystuje pomocniczą funkcję  \texttt{getStatusLabel}. Wymioniona funkcja skupia się na zamianie wartości technicznych na bardziej czytelne, zrozumiałe etykiety. W skład możliwych prezentacji wyników wchodzą wartości „Poprawnie”, „Wymaga uwagi”, „Częściowe” albo „Niepoprawne”. 
+
+Szczegóły oceny pojedynczego wskaźnika nie są widoczne domyślnie. Użytkownik może je rozwinąć za pomocą przycisku dostępnego w karcie powtórzenia. W implementacji odpowiada za to lokalny stan komponentu \texttt{RepetitionCard}, który określa, czy szczegóły są aktualnie pokazane. Takie rozwiązanie ogranicza ilość informacji widocznych na ekranie po zakończeniu analizy i pozwala użytkownikowi skupić się najpierw na ogólnej ocenie serii.
+
+Po rozwinięciu szczegółów użytkownik może zobaczyć powody wpływające na klasyfikację powtórzenia oraz listę sprawdzeń wykonanych przez system. Powody zapisywane są w polu \texttt{validity\_reasons}, natomiast szczegółowe reguły oceny znajdują się w strukturze \texttt{checks}. Dzięki temu interfejs nie ogranicza się do pokazania samego statusu, ale wyjaśnia, które elementy techniki wpłynęły na wynik.
+
+Za prezentację szczegółowych sprawdzeń odpowiada komponent \texttt{ChecksList}. Dla każdego sprawdzenia wyświetlana jest nazwa ocenianego elementu oraz komunikat przygotowany przez moduł analizy. Nazwy techniczne reguł są przekształcane na etykiety czytelne dla użytkownika za pomocą funkcji \texttt{formatCheckName}. Przykładowo sprawdzenia dotyczące wyprostu biodra, wyprostu kolana, zakresu ruchu sztangi lub pozycji startowej mogą zostać przedstawione w formie opisowej, a nie jako nazwy zmiennych używane w kodzie.
+
+Jeżeli system nie wykryje żadnego powtórzenia w przesłanym nagraniu, komponent wyników nie próbuje prezentować pustej listy kart. Zamiast tego wyświetlany jest komunikat informujący, że w filmie nie wykryto powtórzeń. Takie zachowanie jest istotne z punktu widzenia obsługi sytuacji brzegowych, ponieważ brak wykrytych powtórzeń również jest możliwym wynikiem działania systemu, szczególnie przy nieprawidłowo przygotowanym nagraniu.
+
+Oprócz oceny pojedynczych powtórzeń w interfejsie prezentowana jest również spójność całej serii. Sekcja ta pojawia się wtedy, gdy wynik analizy zawiera dane zapisane w polu \texttt{consistency\_evaluation}. Do przygotowania krótkiego opisu wykorzystywana jest funkcja \texttt{buildConsistencySummary}. Jej zadaniem jest przekształcenie szczegółowych informacji o różnicach pomiędzy powtórzeniami w komunikat zrozumiały dla użytkownika.
+
+Ocena spójności serii uzupełnia informacje prezentowane w kartach pojedynczych powtórzeń. Dzięki niej użytkownik może zobaczyć nie tylko to, czy poszczególne powtórzenia zostały wykonane poprawnie, ale również czy cała seria była wykonywana w podobny sposób. Ma to znaczenie praktyczne, ponieważ przy ocenie techniki istotna jest nie tylko poprawność pojedynczego ruchu, ale także powtarzalność wykonania kolejnych powtórzeń.
+
+Przykład rozwiniętych szczegółów oceny pojedynczego powtórzenia oraz spójności serii przedstawiono na rysunku~\ref{fig:szczegoly-powtorzenia}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{figures/obraz_szczegoly.png}
+\caption{Szczegóły oceny pojedynczego powtórzenia w interfejsie użytkownika. Źródło: opracowanie własne.}
+\label{fig:szczegoly-powtorzenia}
+\end{figure}
+
+Na rysunku~\ref{fig:szczegoly-powtorzenia} pokazano sposób prezentacji szczegółowych komunikatów dla pojedynczego powtórzenia oraz spójności wykonanej serii. Widok ten pozwala sprawdzić, które elementy techniki zostały ocenione pozytywnie, a które wymagają dodatkowej uwagi. W dolnej części rysunku widzimy natomiast podsumowanie spójności serii zapewniające informacje dotyczące ogółu nagrania.  
+
+W interfejsie uwzględniono także obsługę błędów i stanów pośrednich. Jeżeli analiza trwa, użytkownik otrzymuje informację o przetwarzaniu. Jeżeli w trakcie przesyłania nagrania lub wykonywania analizy wystąpi błąd, w widoku pojawia się odpowiedni komunikat. Dzięki temu użytkownik nie zostaje bez informacji o stanie aplikacji, nawet jeżeli analiza nie zakończy się poprawnie.
+
+Prezentacja wyników w interfejsie użytkownika została więc oparta na podziale danych na poziom ogólny i szczegółowy. Najpierw wyświetlane są podstawowe informacje o analizie oraz lista powtórzeń, a dopiero po rozwinięciu kart widoczne są szczegółowe komunikaty. Takie rozwiązanie poprawia czytelność widoku i pozwala użytkownikowi stopniowo przechodzić od ogólnej oceny techniki do dokładniejszej analizy poszczególnych elementów ruchu.
+
+\subsection{Ograniczenia implementacji przyjętego rozwiązania}
+
+Zaimplementowany system spełnia główne założenia przyjęte w analizie wymagań. Umożliwia przesłanie nagrania, uruchomienie analizy po stronie serwera, wykrycie powtórzeń, obliczenie wybranych parametrów biomechanicznych oraz prezentację wyników w aplikacji klienckiej. Jednocześnie należy zaznaczyć, że zakres działania systemu został świadomie ograniczony. Wynika to zarówno z charakteru pracy inżynierskiej, jak i z przyjętej metody analizy obrazu wideo.
+
+Pierwsze ograniczenie dotyczy jakości i sposobu przygotowania nagrania. W analizie wymagań założono, że materiał powinien przedstawiać osobę ćwiczącą z boku, obejmować całą sylwetkę oraz pozwalać na wykrycie punktów kluczowych ciała. Implementacja systemu opiera się właśnie na tych założeniach. Jeżeli nagranie jest wykonane z nieodpowiedniej perspektywy, sylwetka jest częściowo zasłonięta albo ćwiczący wychodzi poza kadr, wyniki analizy mogą być niepełne lub błędne. System obsługuje sytuacje niepowodzenia analizy, ale nie jest w stanie całkowicie wyeliminować problemów wynikających z niepoprawnie przygotowanego materiału wejściowego.
+
+Drugim ograniczeniem jest skupienie się na analizie ruchu w obrazie dwuwymiarowym. Wykorzystywanie informacji wyciągniętych na podstawie analizy pojedynczej klatki, pomija informacje dotyczące głębi sceny. Oznacza to że wartości kątów i położeń są mocno zależne od pozycji kamery względem osoby ćwiczącej, co tworzy możliwość zakłamania wyników przez np. niską widoczność lub zasłonięcie szukanego punktu. Wybranie strony ciała do analizy częściowo rozwiązuje ten problem natomiast dla parametru opisującego pozycję sztangi na podstawie pozycji nadgarstków problem dalej istnieje.
+
+Ograniczenie to ma szczególne znaczenie przy ocenie ustawienia pleców i kręgosłupa. W implementacji analizowane są wybrane punkty sylwetki oraz kąty opisujące pozycję tułowia, bioder i kolan. System nie bada jednak rzeczywistej krzywizny kręgosłupa ani ustawienia poszczególnych jego odcinków. Może wskazać sytuacje wymagające uwagi, na przykład niekorzystne ustawienie barku względem biodra, ale nie powinien być traktowany jako narzędzie do jednoznacznej oceny stanu kręgosłupa lub diagnozy medycznej. Jest to zgodne z wymaganiem, zgodnie z którym system ma wspomagać ocenę techniki, a nie zastępować ocenę specjalisty.
+
+Kolejne ograniczenie wynik z użycia gotowego modelu estymacji pozy człowieka. Zwracane przez model punkty kluczowe to tylko przewidywane położenia a nie dokładne pomiary bezpośrednio na ciele osoby. Z tego powodu jakość detekcji zależy od oświetlenie, ubioru, rozdzielczości, innych obiektów w kadrze. Jeżeli w wyniku tych ograniczeń wystąpią błędy, wpłyną one w stopniu znaczącym na końcowy wynik podany przez moduł analizy techniki.
+
+Z tym ograniczeniem wiąże się również sposób wyznaczania położenia gryfu sztangi. W obecnej implementacji położenie sztangi jest przybliżane na podstawie punktów kluczowych związanych z rękami, przede wszystkim z położeniem nadgarstków. System nie wykorzystuje osobnego modelu detekcji sztangi ani talerzy obciążenia. Takie rozwiązanie jest wystarczające do oszacowania przebiegu pionowego ruchu w analizowanym nagraniu, ale może być mniej dokładne w sytuacjach, w których dłonie są słabo widoczne, zasłonięte przez sprzęt albo model estymacji pozy nie wykrywa ich stabilnie.
+
+Ocena techniki została zaimplementowana jako zestaw reguł decyzyjnych, a nie jako osobny model uczenia maszynowego nauczony oceny techniki na podstawie zbioru danych. Reguły sprawdzają się przy większości standardowych sytuacji i wykonań ćwiczenia, ale nie są w stanie objąć wszystkich skrajnych przypadków dotyczących różnic anatomicznych, poziomu zaawansowania czy indywidualnych ograniczeń ruchowych. 
+
+System nie dokonuje też analizy sił działających na poszczególne części ciała osoby ćwiczącej. Na podstawie samych danych z klatki nie możemy policzyć sił działających na stawy, mięśnie, ani sił reakcji podłoża. Ocena opiera się na geometrii a nie na realnych pomiarach sił oddziałujących na wykonującego trening, które mogły by wskazać precyzyjnie w jaki sposób i z jaką siła najlepiej było by oddziaływać w celu zachowania idealnej techniki wykonania ćwiczenia. 
+
+Ograniczenia występują również po stronie aplikacyjnej. W obecnej wersji system analizuje pojedyncze nagranie przesłane przez użytkownika. Nie zaimplementowano kont użytkowników, historii treningów, porównywania wyników między sesjami ani generowania planów treningowych. Zakres ten jest zgodny z wymaganiami funkcjonalnymi, w których skupiono się na analizie pojedynczego materiału wideo oraz prezentacji wyniku. Rozszerzenie systemu o funkcje długoterminowego śledzenia postępów wymagałoby zaprojektowania dodatkowych modeli danych i mechanizmów autoryzacji.
+
+Analiza nagrania uruchamiana jest synchronicznie w ramach obsługi żądania HTTP. Takie rozwiązanie upraszcza implementację i pozwala łatwo prześledzić przepływ danych od przesłania pliku do zwrócenia wyniku. Jednocześnie może ono stanowić ograniczenie w przypadku dłuższych nagrań lub większej liczby użytkowników korzystających z systemu równocześnie. W dalszym rozwoju projektu możliwe byłoby przeniesienie analizy do kolejki zadań lub osobnego procesu roboczego, co pozwoliłoby lepiej obsługiwać czasochłonne operacje.
+
+Ostatnim ograniczeniem jest zakres weryfikacji skuteczności reguł oceny. System został przygotowany tak, aby umożliwić analizę nagrania i przedstawić wynik w uporządkowanej formie, jednak pełna walidacja jakości ocen wymagałaby testów na większym zbiorze nagrań oraz porównania wyników z oceną ekspertów.
+
+Przyjęte ograniczenia nie przekreślają realizacji celu pracy. System wykonuje analizę w zakresie określonym w wymaganiach, oddziela część kliencką od serwerowej, wykorzystuje wydzielony moduł analizy wideo i prezentuje użytkownikowi wynik w czytelnej formie. Ograniczenia wskazują natomiast granice interpretacji otrzymanych wyników oraz obszary, które mogłyby zostać rozwinięte w kolejnych wersjach projektu.

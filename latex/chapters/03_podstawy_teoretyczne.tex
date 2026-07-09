@@ -1,0 +1,168 @@
+\section{Podstawy teoretyczne}
+
+\subsection{Charakterystyka martwego ciągu}
+
+Martwy ciąg jest ćwiczeniem wielostawowym, w którym zadaniem osoby ćwiczącej jest podniesienie obciążenia z podłoża do pozycji stojącej, a następnie jego kontrolowane opuszczenie \cite{hanen2025deadlift}. Ruch ten angażuje wiele segmentów ciała, przede wszystkim kończyny dolne, obręcz biodrową, tułów, obręcz barkową oraz kończyny górne \cite{hanen2025deadlift}. Z biomechanicznego punktu widzenia martwy ciąg można opisać jako złożony wzorzec ruchowy oparty na współpracy stawów biodrowych, kolanowych i skokowych, przy jednoczesnej stabilizacji kręgosłupa oraz utrzymaniu obciążenia możliwie blisko ciała \cite{hanen2025deadlift,ramirez2022lowback}. Angażuje on mięśnie:
+
+\begin{itemize}
+\item mięsień czworogłowy uda,
+\item mięsień dwugłowy uda,
+\item mięsień pośladkowy wielki,
+\item mięśnie przedramion i mięśnie ramion,
+\item mięśnie czworoboczne i najszersze grzbietu,
+\item prawie wszystkie mięśnie brzucha.
+\end{itemize}
+
+W zależności od przyjętej techniki wyróżnia się między innymi martwy ciąg klasyczny oraz martwy ciąg sumo \cite{hanen2025deadlift}. W niniejszej pracy skupiono się tylko i wyłącznie na wariancie wykonywanym stylem klasycznym. W martwym ciągu klasycznym stopy ustawione są zwykle na szerokość zbliżoną do szerokości bioder, a dłonie chwytają sztangę po zewnętrznej stronie nóg \cite{hanen2025deadlift}. W niniejszej pracy analizowany jest przede wszystkim ogólny wzorzec ruchu martwego ciągu, ze szczególnym uwzględnieniem parametrów możliwych do wyznaczenia na podstawie obrazu wideo, z pominięciem dokładnego wyznaczenia i analizy zachowania krzywizny kręgosłupa \cite{wade2022markerless,ramirez2022lowback}.
+
+
+
+Na potrzeby analizy wideo martwy ciąg można podzielić na następujące fazy \cite{hanen2025deadlift}:
+\begin{itemize}
+\item pozycję początkową,
+\item rozpoczęcie ruchu i oderwanie obciążenia od podłoża,
+\item fazę podnoszenia obciążenia,
+\item pozycję końcową w wyproście,
+\item fazę opuszczania obciążenia,
+\item powrót do pozycji początkowej.
+\end{itemize}
+
+Podział ruchu na fazy jest istotny z punktu widzenia implementacji systemu informatycznego, ponieważ umożliwia wykrywanie pojedynczych powtórzeń, porównywanie ich przebiegu oraz ocenę wybranych cech techniki \cite{mundt2024twodimensional}. Na podstawie zależności między punktami kluczowymi możliwe jest określenie, w jakiej fazie ruchu znajduje się obecnie osoba na obrazie, co pozwoli na analizę techniki w każdej z faz \cite{mediapipe_pose_landmarker,mundt2024twodimensional}.
+
+Poprawne wykonanie martwego ciągu rozpoczyna się od poprawnej pozycji początkowej. Należy ustawić się w rozkroku tak, aby chwycić wygodnie sztangę na szerokość barków, bez forsowania odchylenia kolan do wewnątrz. Stopy powinny być skierowane prawie prostopadle do sztangi, z lekkim wychyleniem na zewnątrz, a sztanga ustawiona nad środkiem stopy. Plecy powinny być dobrze usztywnione w odcinku lędźwiowym, staw biodrowy powinien znajdować się poniżej barków, a kolana powinny być zgięte \cite{hanen2025deadlift,ramirez2022lowback}.
+
+W fazie podnoszenia ciężaru sztanga powinna poruszać się po torze możliwie zbliżonym do pionowego. Nadmierne oddalenie środka ciężkości od ciała wykonującego zwiększa siły oddziałujące na odcinek lędźwiowy kręgosłupa oraz staw biodrowy \cite{ramirez2022lowback}. Prawidłowy tor ruchu sztangi powinien przebiegać blisko piszczeli, a potem ud, przy kontrolowaniu pozycji kolan, bioder i tułowia \cite{hanen2025deadlift}.
+
+Końcowa faza ruchu polega na osiągnięciu pozycji wyprostowanej. W tej pozycji kąt między stawami kolanowymi, biodrowymi oraz barkowymi jest zbliżony do 180 stopni. Tułów oraz barki pozostają ustabilizowane. Niepożądane jest nadmierne odchylenie tułowia do tyłu w końcowej fazie ruchu. Prowadzi ono do nadmiernego obciążenia odcinka lędźwiowego kręgosłupa \cite{ramirez2022lowback}. Faza opuszczania powinna przebiegać w sposób kontrolowany, z zachowaniem toru ruchu podobnego do fazy podnoszenia aż do fazy początkowej \cite{hanen2025deadlift}.
+
+\subsection{Biomechaniczne aspekty oceny techniki}
+
+Biomechanika zajmuje się opisem ruchu człowieka z wykorzystaniem zasad mechaniki. W przypadku ćwiczenia, jakim jest martwy ciąg, szczególnie istotna jest analiza pod kątem kinematyki \cite{hanen2025deadlift}. Pomijając masę ciała i działające na nie siły, system skupia się na położeniu punktów kluczowych, ich przemieszczeniu oraz kątach pomiędzy danymi segmentami sylwetki \cite{wade2022markerless}. Na podstawie analizy kolejnych klatek filmu wyznaczone zostaną kluczowe dla oceny stawy \cite{mediapipe_pose_landmarker}.
+
+Skupiając się na analizie kinematycznej materiału wideo, system nie będzie wykonywał pełnej analizy dynamicznej, ponieważ wymagałaby ona specyficznych danych: masy segmentów ciała, masy obciążenia, pomiaru sił oraz trójwymiarowych danych obrazu \cite{wade2022markerless,ramirez2022lowback}. Rozwiązanie skupia się na wyciągnięciu potrzebnych informacji oraz wyliczeniu wymaganych parametrów tylko z jednego dwuwymiarowego pliku wideo \cite{wade2022markerless}. Do najważniejszych parametrów wymaganych w kontekście oceny martwego ciągu należą:
+\begin{itemize}
+\item kąt w stawie biodrowym,
+\item kąt w stawie kolanowym,
+\item orientacja tułowia względem kończyn dolnych,
+\item położenie bioder, barków, kolan i kostek w czasie,
+\item zakres ruchu w pojedynczym powtórzeniu,
+\item podobieństwo kolejnych powtórzeń względem siebie,
+\item stabilność przebiegu ruchu w fazie podnoszenia i opuszczania.
+\end{itemize}
+
+Kąt w stawie biodrowym może zostać przybliżony na podstawie położenia barku, biodra i kolana. W uproszczeniu opisuje on relację pomiędzy tułowiem a udem. Kąt w stawie kolanowym może zostać obliczony na podstawie położenia biodra, kolana i kostki, dzięki czemu możliwe jest określenie stopnia ugięcia kończyn dolnych \cite{mediapipe_pose_docs,hanen2025deadlift}. Zmiany tych wartości w czasie pozwalają opisać sposób rozpoczęcia ruchu, moment osiągnięcia wyprostu oraz zakres pracy kończyn dolnych \cite{hanen2025deadlift}.
+
+W analizie techniki martwego ciągu istotne jest nie tylko osiągnięcie pozycji końcowej, lecz także przebieg całego ruchu \cite{hanen2025deadlift}. Przykładowo, zbyt szybkie prostowanie kolan przy jednoczesnym pozostawaniu bioder w niskiej pozycji lub zbyt szybkie unoszenie bioder bez ruchu barków może świadczyć o zaburzonej koordynacji ruchu. Z tego powodu analiza powinna uwzględniać zmiany kątów w czasie, a nie wyłącznie pojedyncze wartości odczytane z jednej klatki nagrania \cite{mundt2024twodimensional}.
+
+W praktyce systemu informatycznego parametry biomechaniczne mogą być wykorzystywane do tworzenia prostych reguł oceny \cite{wade2022markerless}. Przykładowo, powtórzenie może zostać uznane za niepełne, jeżeli w końcowej fazie ruchu nie zostanie osiągnięty odpowiedni zakres wyprostu bioder lub kolan. System może również wskazywać powtórzenia wymagające uwagi, jeżeli ich parametry znacząco odbiegają od pozostałych powtórzeń w serii. Takie podejście nie zastępuje oceny trenerskiej, ale pozwala na automatyczne wychwycenie wybranych cech ruchu \cite{wade2022markerless}.
+
+\subsection{Analiza obrazu wideo w ocenie ruchu}
+
+Nagranie wideo jest sekwencją klatek. W każdej klatce możliwe jest wykrycie położenia wybranych stawów, a następnie zapisanie ich współrzędnych \cite{mediapipe_pose_landmarker}. Po połączeniu informacji z wielu klatek otrzymuje się przebieg ruchu w czasie \cite{mundt2024twodimensional}. Tak przygotowane dane mogą zostać wykorzystane do obliczania kątów między nimi, wykrywania faz ćwiczenia oraz oceny powtarzalności powtórzeń \cite{mundt2024twodimensional}. Analiza nie powinna być dokonywana na każdej klatce filmu. Powinna być wykonana co kilka klatek, aby uniknąć szumu wynikającego ze zbyt małego przesunięcia punktów. Moduł uczenia maszynowego nie dokonuje idealnego wykrycia położenia punktów, w wyniku czego zbyt częste badanie przesunięcia może prowadzić do niedokładnych wyników \cite{wade2022markerless}.
+
+Proces analizy wideo można przedstawić jako ciąg następujących etapów:
+\begin{itemize}
+\item wczytanie nagrania przesłanego przez użytkownika,
+\item podział nagrania na pojedyncze klatki,
+\item wykrycie punktów kluczowych sylwetki w klatkach co wybrany interwał,
+\item zapis współrzędnych punktów w czasie,
+\item obliczenie wybranych parametrów biomechanicznych,
+\item wykrycie pojedynczych powtórzeń,
+\item ocena powtórzeń z wykorzystaniem zaimplementowanych reguł,
+\item prezentacja wyników użytkownikowi.
+\end{itemize}
+
+W przypadku analizy martwego ciągu szczególnie korzystne jest nagranie z perspektywy bocznej \cite{hanen2025deadlift,wade2022markerless}. Z takiej perspektywy obliczenie kątów zgięcia stawów, pochylenia tułowia oraz drogi pokonanej przez sztangę będzie dokładne i proste do wykonania. Ustawienie kamery pod kątem względem ćwiczącego, na zbyt małej odległości lub zakrycie części sylwetki znacząco wpływa na analizę, zaniżając jej dokładność \cite{wade2022markerless}. Z tego powodu należy upewnić się, że użytkownik będzie świadomy silnego bezpośredniego wpływu jakości danych wejściowych na otrzymane parametry wyjściowe generowane przez system oceny techniki \cite{wade2022markerless}.
+
+Implikacją wynikającą z przyjęcia perspektywy bocznej oraz skupienia na analizie tylko dwuwymiarowej jest brak dokładnej wiedzy na temat rotacji kolan, tułowia, asymetrii bioder oraz dystansu między kończynami \cite{wade2022markerless}. Generalizując, wszystko poza płaszczyzną kamery będzie niemożliwe do ocenienia w zadowalającym stopniu zgodności \cite{wade2022markerless}. Takie podejście, pomimo swoich wad, jest optimum między dostępnością dla użytkownika pod kątem nagrania poprawnych danych wejściowych a dokładnością parametrów wyjściowych systemu.
+
+\subsection{Estymacja pozy człowieka}
+
+Estymacja pozy człowieka jest zagadnieniem z obszaru widzenia komputerowego, którego celem jest określenie położenia wybranych punktów anatomicznych na podstawie obrazu \cite{chen2020monocular}. Punkty te nazywane są punktami kluczowymi. Najczęściej odpowiadają one położeniu takich części ciała jak barki, łokcie, nadgarstki, biodra, kolana i kostki \cite{mediapipe_pose_docs}. Wynikiem działania modelu estymacji pozy jest więc uproszczony szkielet człowieka opisany za pomocą współrzędnych punktów \cite{mediapipe_pose_landmarker}.
+
+Współczesne modele estymacji pozy wykorzystują głównie metody uczenia maszynowego, w szczególności głębokie sieci neuronowe \cite{chen2020monocular}. Modele te uczone są na dużych zbiorach danych zawierających obrazy wejściowe, w których położenie punktów kluczowych zostało wcześniej oznaczone przez człowieka \cite{chen2020monocular}. Podczas uczenia model analizuje zależności pomiędzy pikselami obrazu a położeniem poszczególnych oznaczonych części ciała. Po zakończeniu uczenia model może otrzymać nowy obraz i przewidzieć, gdzie znajdują się wybrane punkty sylwetki, podając przy tym dokładność danej oceny \cite{mediapipe_pose_landmarker}.
+
+W ogólnym ujęciu można wyróżnić dwa podejścia do estymacji pozy: dwuwymiarowe oraz trójwymiarowe \cite{chen2020monocular}. Estymacja dwuwymiarowa zwraca współrzędne punktów w płaszczyźnie dwuwymiarowej obrazu, analogicznie estymacja trójwymiarowa próbuje odtworzyć położenie punktów w przestrzeni trójwymiarowej \cite{chen2020monocular}. W przypadku pojedynczego nagrania z jednej kamery analiza trójwymiarowa jest trudna, ponieważ obraz nie zawiera pełnej informacji o głębi \cite{wade2022markerless}. Z tego powodu w wielu praktycznych zastosowaniach wykorzystuje się estymację dwuwymiarową, która jest wystarczająca do podstawowej analizy ruchu w bocznej płaszczyźnie dwuwymiarowej \cite{wade2022markerless}.
+
+W niniejszej pracy zastosowano gotowy model estymacji pozy człowieka \cite{mediapipe_pose_landmarker,bazarevsky2020blazepose}. Oznacza to, że system nie uczy modelu od podstaw, lecz korzysta z istniejącego rozwiązania, które zostało już nauczone wykrywania punktów kluczowych sylwetki w kolejnych klatkach nagrania \cite{mediapipe_pose_docs,mediapipe_pose_landmarker}. Własny wkład pracy dotyczy natomiast integracji modelu z aplikacją, przetwarzania jego wyników, obliczania parametrów biomechanicznych oraz implementacji reguł oceny techniki na podstawie danych parametrów zebranych na osi czasu.
+
+Takie podejście jest uzasadnione z perspektywy pracy inżynierskiej o charakterze aplikacyjnym. Uczenie modelu estymacji pozy od podstaw wymagałoby bardzo dużego zbioru danych, ciężkiego do zebrania w pojedynkę, wysokich zasobów obliczeniowych oraz osobnej walidacji jakości modelu \cite{chen2020monocular}. Wykorzystanie gotowego rozwiązania pozwala skoncentrować się na zaprojektowaniu kompletnego systemu, analizującego same dane wynikowe oraz przekształcającego nagranie wideo w zrozumiałą informację zwrotną dla użytkownika, bez ograniczającego czynnika poprawności działania samego modelu detekcji \cite{mediapipe_pose_landmarker,wade2022markerless}.
+
+\subsection{Punkty kluczowe sylwetki i obliczanie kątów}
+
+Podstawą dla obliczeń dokonywanych przez system są punkty kluczowe sylwetki \cite{mediapipe_pose_docs}. Dla każdej ocenianej klatki model zwraca współrzędne wybranych punktów \cite{mediapipe_pose_landmarker}. W zależności od wybranego modelu forma danych wyjściowych będzie różna, jednak w analizie ćwiczenia siłowego, jakim jest martwy ciąg, najważniejsze będą punkty odpowiadające pozycji stawów kończyn górnych, dolnych oraz obręczy barkowej i bioder \cite{mediapipe_pose_docs,hanen2025deadlift}.
+
+W kontekście niniejszej pracy szczególne znaczenie mają punkty opisujące:
+\begin{itemize}
+\item bark,
+\item biodro,
+\item kolano,
+\item kostkę,
+\item nadgarstek.
+\end{itemize}
+
+Na podstawie tych punktów można obliczyć kąty pomiędzy segmentami ciała biorącymi udział w ćwiczeniu \cite{wade2022markerless}. Kąt w stawie kolanowym może zostać wyznaczony jako kąt pomiędzy odcinkiem biodro--kolano oraz odcinkiem kolano--kostka. Kąt w stawie biodrowym może zostać przybliżony jako kąt pomiędzy odcinkiem bark--biodro oraz odcinkiem biodro--kolano \cite{hanen2025deadlift}. Obliczenie kąta wymaga potraktowania sąsiednich punktów jako wektorów i zastosowania zależności wynikającej z iloczynu skalarnego.
+
+Jeżeli dane są trzy punkty: $A$, $B$ oraz $C$, gdzie punkt $B$ jest wierzchołkiem kąta, to kąt pomiędzy odcinkami $BA$ i $BC$ można obliczyć ze wzoru:
+\begin{equation}
+\theta =
+\arccos
+\left(
+\frac{
+\vec{BA} \cdot \vec{BC}
+}{
+\lVert \vec{BA} \rVert \cdot \lVert \vec{BC} \rVert
+}
+\right).
+\end{equation}
+
+Wartość kąta uzyskana podczas analizy pojedynczej klatki odpowiada przybliżonemu ułożeniu części ciała w danym momencie ruchu \cite{wade2022markerless}. Dopiero przeprowadzenie analizy wielu klatek po naniesieniu ich na oś czasu pozwala określić przebieg ruchu w czasie \cite{mundt2024twodimensional}. Dzięki temu możliwe jest wyodrębnienie oddzielnych faz ruchu: przygotowawczej, podnoszenia, kończącej ruch, odkładania ciężaru oraz bezczynnej \cite{mundt2024twodimensional}.
+
+W praktyce wartości obliczane na podstawie punktów kluczowych mogą podlegać wahaniom wynikającym z błędów detekcji \cite{wade2022markerless}. Model może w jednej klatce wskazać punkt nieco wyżej lub niżej niż w klatce poprzedniej, pomimo tego, że rzeczywisty ruch był płynny. Z tego powodu w systemach analizy ruchu stosuje się dodatkowe przetwarzanie wyników, takie jak filtrowanie, wygładzanie przebiegów czasowych lub odrzucanie klatek o niskim poziomie pewności wyniku \cite{wade2022markerless}. W niniejszej pracy kluczowe znaczenie ma uzyskanie stabilnych wartości kątów, ponieważ to one stanowią podstawę oceny powtórzeń i są istotniejsze niż dokładne śledzenie ruchu klatka po klatce \cite{mundt2024twodimensional}.
+
+\subsection{Uczenie maszynowe w analizie wideo}
+
+Uczenie maszynowe jest podejściem, w którym, wykorzystując matematyczne algorytmy rozpoznawania wzorców, system komputerowy nie jest programowany tylko i wyłącznie za pomocą reguł ręcznie zapisanych przez programistę, lecz uczony na podstawie danych treningowych \cite{chen2020monocular}. W przypadku modelu wykorzystywanego w aplikacji na wejściu występuje obraz, a na wyjściu współrzędne punktów w tablicy \cite{mediapipe_pose_landmarker}.
+
+Współczesne modele estymacji pozy najczęściej wykorzystują głębokie sieci neuronowe, w szczególności sieci konwolucyjne lub architektury pokrewne \cite{chen2020monocular}. Warstwy sieci analizują obraz na różnych poziomach szczegółowości. Początkowe warstwy mogą wykrywać proste cechy, takie jak krawędzie i kontrasty, natomiast kolejne warstwy tworzą bardziej złożone reprezentacje, pozwalające rozpoznać części ciała oraz ich wzajemne położenie \cite{chen2020monocular}. Wynikiem działania modelu jest zestaw punktów kluczowych wraz z informacją o pewności detekcji \cite{mediapipe_pose_landmarker}.
+
+Przy wykonywaniu analizy wideo model estymacji wywoływany jest w pętli iterującej przez kolejne klatki nagrania \cite{mediapipe_pose_landmarker}. Następnie wyniki łączone są w przebieg czasowy potrzebny do dalszej analizy \cite{mundt2024twodimensional}. W takim podejściu moduł uczenia maszynowego wykorzystywany jest tylko na etapie percepcji obrazu, natomiast dalsza interpretacja wykonywana jest już przez samą aplikację \cite{wade2022markerless}.
+
+Zastosowano więc podejście hybrydowe. Gotowy model klasyfikuje punkty kluczowe, a następnie zaimplementowane metody analityczne obliczają kąty, wykrywają powtórzenia, obserwują zmianę w czasie i stosują reguły dotyczące techniki \cite{mediapipe_pose_landmarker,wade2022markerless}. Takie rozwiązanie jest bardzo przejrzyste w kwestii abstrakcji, które etapy są w zakresie odpowiedzialności którego modułu.
+
+Podejście regułowe ma również znaczenie praktyczne. W przypadku pełnego modelu klasyfikacyjnego konieczne byłoby przygotowanie zbioru nagrań oznaczonych jako poprawne i niepoprawne, a następnie przeprowadzenie procesu uczenia oraz walidacji \cite{chen2020monocular}. W projekcie aplikacyjnym bardziej uzasadnione jest wykorzystanie gotowego modelu do detekcji punktów i skupienie się na interpretacji parametrów biomechanicznych \cite{mediapipe_pose_landmarker,wade2022markerless}. Dzięki temu system może prezentować użytkownikowi nie tylko końcową ocenę, lecz także wartości pośrednie, takie jak kąty w stawach lub status poszczególnych powtórzeń.
+
+\subsection{Wykrywanie powtórzeń i ocena techniki}
+
+Wykrywanie powtórzeń polega na podziale ciągłego nagrania na fragmenty odpowiadające pojedynczym wykonaniom ćwiczenia \cite{mundt2024twodimensional}. W martwym ciągu powtórzenie można opisać jako przejście od pozycji początkowej, przez fazę podnoszenia i osiągnięcie pozycji wyprostowanej, do kontrolowanego powrotu do pozycji początkowej \cite{hanen2025deadlift}. Automatyczne rozpoznanie tych etapów może zostać wykonane na podstawie zmian położenia punktów kluczowych oraz zmian wartości kątów w czasie \cite{mediapipe_pose_landmarker,mundt2024twodimensional}.
+
+W analizowanym ćwiczeniu szczególnie użyteczne są wartości opisujące ustawienie bioder, kolan oraz śledzenie pozycji gryfu \cite{hanen2025deadlift}. W pozycji początkowej stawy biodrowe i kolanowe są ugięte, natomiast w pozycji końcowej powinny osiągnąć większy stopień wyprostu \cite{hanen2025deadlift}. Z tego powodu przebieg kąta biodrowego i kolanowego może zostać wykorzystany do określenia, czy użytkownik faktycznie wykonał pełne powtórzenie \cite{hanen2025deadlift,mundt2024twodimensional}. Dodatkowo, śledząc ruch sztangi przy założeniu, że kamera jest statyczna, otrzymywana jest informacja o zakresie danego powtórzenia pod kątem zakresu jego wykonania. Jeżeli zakres zmiany kątów jest zbyt mały lub tor ruchu za krótki, powtórzenie może zostać oznaczone jako niepełne lub wymagające uwagi \cite{mundt2024twodimensional}.
+
+Ocena techniki w projektowanym systemie opiera się na wybranych, mierzalnych cechach ruchu \cite{wade2022markerless}. Do przykładowych kryteriów należą:
+\begin{itemize}
+\item osiągnięcie odpowiedniego wyprostu w pozycji końcowej,
+\item zachowanie wystarczającego zakresu ruchu,
+\item podobieństwo kolejnych powtórzeń w serii,
+\item brak nadmiernych odchyleń wybranych parametrów względem typowego przebiegu,
+\item stabilność pozycji tułowia i kończyn dolnych w analizowanej płaszczyźnie.
+\end{itemize}
+
+Wyniki oceny powinny być traktowane jako informacja pomocnicza, a nie jako jednoznaczna diagnoza poprawności techniki \cite{wade2022markerless}. System może wykazać odchylenia od przyjętych kryteriów, ale do pełnego potwierdzenia błędów wymagana jest pełna ocena wykonana przez trenera, fizjoterapeutę lub specjalistę biomechaniki. Wynika to ze wspomnianych wcześniej ograniczeń wynikających z zachowania optimum między wygodą użycia dla użytkownika a głębokością przeprowadzanej analizy \cite{wade2022markerless}.
+
+\subsection{Ograniczenia analizy na podstawie obrazu wideo}
+
+Analiza techniki ćwiczenia na podstawie pojedynczego nagrania wideo posiada kilka istotnych ograniczeń \cite{wade2022markerless}. Pierwszym z nich jest utrata informacji o głębi. Obraz dwuwymiarowy przedstawia ruch rzutowany na płaszczyznę kamery, dlatego nie wszystkie przemieszczenia ciała są widoczne w jednakowym stopniu \cite{wade2022markerless}. Z tego powodu system skupia się głównie na stronie ciała widocznej dokładniej. Jeśli chodzi o mniej widoczną stronę nagrania, przyda się ona głównie do wykrycia środka gryfu potrzebnego do określenia toru ruchu sztangi.
+
+Drugim ograniczeniem jest zależność jakości analizy od warunków nagrania \cite{wade2022markerless}. Niewłaściwe ustawienie kamery, słabe oświetlenie, niska rozdzielczość, luźny ubiór, zasłonięcie stawów przez obciążenie lub inne obiekty mogą prowadzić do błędów detekcji punktów kluczowych \cite{wade2022markerless}. W przypadku martwego ciągu problemem może być na przykład zasłonięcie kolana, biodra lub kostki przez talerze sztangi albo przez ustawienie kończyn względem kamery.
+
+Trzecim ograniczeniem jest niepewność działania modelu estymacji pozy \cite{wade2022markerless}. Model uczenia maszynowego zwraca przewidywane położenie punktów, a nie bezpośredni pomiar anatomiczny \cite{wade2022markerless}. Oznacza to, że wykryte punkty mogą odbiegać od rzeczywistego położenia stawów. Błąd ten może wpływać na obliczone kąty, a w konsekwencji również na ocenę techniki. Z tego powodu należy odrzucać pomiary o zbyt niskim stopniu pewności, co wpłynie na ciągłość danych na osi czasu \cite{mediapipe_pose_landmarker,wade2022markerless}.
+
+Kolejnym ograniczeniem jest uproszczenie biomechaniczne przyjęte w analizie. System zakłada, że wybrane punkty i kąty wystarczają do opisania podstawowych cech ruchu \cite{wade2022markerless}. W rzeczywistości technika martwego ciągu zależy również od wielu innych czynników, takich jak indywidualna budowa ciała, proporcje kończyn, mobilność stawów, doświadczenie treningowe, tempo ruchu, masa obciążenia oraz poziom zmęczenia \cite{hanen2025deadlift,ramirez2022lowback}. Część tych czynników nie jest bezpośrednio dostępna w analizie wideo \cite{wade2022markerless}.
+
+Ostatnim ograniczeniem jest brak możliwości dokładnej oceny krzywizny kręgosłupa, co stanowi częsty błąd wynikający z niepoprawnego przegięcia odcinka lędźwiowego pod znaczącym ciężarem obciążenia \cite{ramirez2022lowback,wade2022markerless}.
+
+\subsection{Znaczenie omawianych zagadnień dla projektowanego systemu}
+
+Przedstawione podstawy teoretyczne są niezbędnymi komponentami potrzebnymi do zaprojektowania działającego systemu analizy. Teoria poprawnego wykonania ruchu definiuje, na jakie błędy należy zwrócić uwagę \cite{hanen2025deadlift,ramirez2022lowback}. Analiza biomechaniczna pozwala na znalezienie elementów potrzebnych do detekcji tych błędów \cite{hanen2025deadlift}. Natomiast sam model estymacji jest niezbędny do przetworzenia danych wejściowych na specjalistyczne parametry wyjściowe bez stosowania specjalistycznego sprzętu pomiarowego \cite{mediapipe_pose_landmarker,wade2022markerless}.
+
+W projektowanym rozwiązaniu gotowy model estymacji pozy pełni funkcję modułu wykrywającego punkty kluczowe sylwetki \cite{mediapipe_pose_landmarker}. Następnie zaimplementowany moduł analizy przekształca te punkty w wartości liczbowe, takie jak kąty w stawie biodrowym i kolanowym. Na podstawie zmian tych wartości w czasie możliwe jest wykrywanie powtórzeń oraz przypisanie im statusu oceny \cite{mundt2024twodimensional}. Takie podejście łączy metody uczenia maszynowego z regułową interpretacją biomechaniczną, co pozwala uzyskać rozwiązanie zrozumiałe dla użytkownika i możliwe do dalszej rozbudowy \cite{wade2022markerless}.
