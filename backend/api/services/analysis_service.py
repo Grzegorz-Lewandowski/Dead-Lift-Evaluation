@@ -20,7 +20,7 @@ def run_deadlift_analysis(video_path: str) -> dict:
     analysis.video.path
     """
 
-    analyzer = DeadliftAnalyzer()
+    analyzer = DeadliftAnalyzer(debug_print=True)
     result = analyzer.analyze(video_path)
 
     return make_json_serializable(result)

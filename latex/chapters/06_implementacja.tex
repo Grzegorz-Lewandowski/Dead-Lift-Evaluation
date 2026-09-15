@@ -70,7 +70,15 @@ Centralnym elementem modułu jest klasa \texttt{DeadliftAnalyzer}. Nie odpowiada
 
 Funkcjonalność klasy \texttt{DeadliftAnalyzer} przedstawiono we fragmencie kodu~\ref{lst:deadlift-analyzer}. Na wycinku kodu widać, że nie implementuje ona bezpośrednio wszystkich szczegółowych obliczeń, lecz wywołuje kolejne funkcje odpowiedzialne za poszczególne etapy analizy, zachowując abstrakcję zgodną ze standardami paradygmatu programowania obiektowego.
 
-\begin{lstlisting}[language=Python, caption={Klasa koordynująca proces analizy martwego ciągu. Źródło: opracowanie własne.}, label={lst:deadlift-analyzer}]
+\begin{lstlisting}[
+language=Python,
+caption={Klasa koordynująca proces analizy martwego ciągu. Źródło: opracowanie własne.},
+label={lst:deadlift-analyzer},
+basicstyle=\small\ttfamily,
+breaklines=true,
+breakatwhitespace=true,
+columns=fullflexible
+]
 class DeadliftAnalyzer:
     def __init__(self, estimator=None):
         self.estimator = estimator or PoseEstimator()
@@ -102,7 +110,7 @@ Pierwszym etapem działania metody \texttt{analyze} jest utworzenie osi czasu an
 
 Wynikiem tego segmentu pracy systemu jest lista wpisów opisujących kolejne przeanalizowane klatki nagrania. Każdy wpis zawiera w sobie numer klatki, czas nagrania, informację o tym, czy wykryto sylwetkę, wybraną stronę ciała, obliczone metryki, pozycję sztangi oraz punkty kluczowe sylwetki. Przygotowana w ten sposób tablica jest później podstawą dla pozostałych części systemu analizujących wyniki zestawione na osi czasu. Na jej podstawie wykrywane są powtórzenia, przypisywane są fazy ruchu, a następnie przygotowywane są podsumowania potrzebne do oceny techniki.
 
-Po przygotowaniu osi czasu metoda \texttt{analyze} uruchamia funkcję wykrywania powtórzeń \texttt{detect\_repetitions}. Wykryte powtórzenia są następnie przypisywane do odpowiednich fragmentów osi czasu za pomocą funkcji \texttt{assign\_repetitions\_to\_timeline}, dzięki czemu poszczególne klatki mogą zostać powiązane z numerem powtórzenia oraz fazą ruchu. W dalszej kolejności tworzone są podsumowania powtórzeń za pomocą metody \texttt{summarize\_repetitions}, obejmujące między innymi czas trwania ruchu, zakres ruchu sztangi oraz wartości kątów wyznaczonych dla analizowanej strony ciała. Dane te są następnie przekazywane do funkcji \texttt{evaluate\_repetitions} odpowiedzialnej za ocenę pojedynczych powtórzeń oraz \texttt{evaluate\_repetition\_consistency}, odpowiadającej za ocenę spójności całej serii.
+Po przygotowaniu osi czasu metoda \texttt{analyze} uruchamia funkcję wykrywania powtórzeń \texttt{detect\_repetitions}. Wykryte powtórzenia są następnie przypisywane do odpowiednich fragmentów osi czasu za pomocą funkcji \texttt{assign\_repetitions\_to\_timeline}, dzięki czemu poszczególne klatki mogą zostać powiązane z numerem powtórzenia oraz fazą ruchu. W dalszej kolejności tworzone są podsumowania powtórzeń za pomocą metody \texttt{summarize\_repetitions}, obejmujące między innymi czas trwania ruchu, zakres ruchu sztangi oraz wartości kątów wyznaczonych dla analizowanej strony ciała. Dane te są następnie przekazywane do funkcji \texttt{evaluate\_repetitions} odpowiedzialnej za ocenę pojedynczych powtórzeń oraz oddzielnej \texttt{evaluate\_repetition\_consistency}, odpowiadającej za ocenę spójności całej serii.
 
 Końcowym wynikiem otrzymywanym po wykonaniu wszystkich powyższych funkcji jest struktura danych zawierająca liczbę wykrytych powtórzeń, oś czasu analizy, listę powtórzeń, podsumowania powtórzeń, oceny techniki oraz ocenę spójności serii. W ten sposób podany wynik jest później odbierany przez aplikację serwerową i zwracany użytkownikowi jako wynik analizy. Otrzymany słownik jest potem w prosty sposób konwertowany do formatu JSON i przekazywany do aplikacji klienckiej.
 
@@ -382,7 +390,7 @@ Wynikiem tego etapu jest lista ocen powtórzeń. Dane te mogą zostać przekazan
 
 \subsection{Ocena spójności serii}
 
-Po ocenie pojedynczych powtórzeń system wykonuje jeszcze jeden etap analizy, którego celem jest sprawdzenie spójności całej serii. Za tę część odpowiedzialna jest funkcja \texttt{evaluate\_repetition\_consistency} umieszczona w module \texttt{technique\_evaluation.py}. W przeciwieństwie do poprzedniego etapu nie analizuje ona osobno każdego powtórzenia, lecz porównuje powtórzenia między sobą.
+Po ocenie pojedynczych powtórzeń system wykonuje jeszcze jeden etap analizy, którego celem jest sprawdzenie spójności całej serii. Za tę część odpowiedzialna jest funkcja o nazwie \texttt{evaluate\_repetition\_consistency} umieszczona w module \texttt{technique\_evaluation.py}. W przeciwieństwie do poprzedniego etapu nie analizuje ona osobno każdego powtórzenia, lecz porównuje powtórzenia między sobą.
 
 Sama implementacja tego etapu znajduje się w znaczącym stopniu w funkcji pomocniczej o nazwie \texttt{get\_summaries\_for\_consistency}, która wybiera podsumowania używane do porównania serii. Jeżeli dostępna jest wystarczająca liczba powtórzeń oznaczonych jako poprawne, to właśnie one są wykorzystywane w pierwszej kolejności. W przeciwnym przypadku funkcja zwraca wszystkie dostępne podsumowania, aby możliwe było wykonanie oceny również dla mniej jednorodnych nagrań.
 

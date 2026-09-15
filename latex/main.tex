@@ -1,49 +1,124 @@
 \documentclass[12pt,a4paper]{article}
-\usepackage{url}
+
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[polish]{babel}
-\usepackage{lmodern}
-\usepackage{geometry}
+
+\usepackage{newtxtext}
+\usepackage{newtxmath}
+\usepackage[
+    a4paper,
+    top=2.5cm,
+    bottom=2.5cm,
+    left=3cm,
+    right=2cm,
+    headheight=1.25cm,
+    footskip=1.25cm
+]{geometry}
+
+\usepackage{setspace}
+
 \usepackage{graphicx}
 \usepackage{float}
+\usepackage{booktabs}
+\usepackage{array}
+
+\usepackage{amsmath}
+\numberwithin{figure}{section}
+\numberwithin{table}{section}
+
+\usepackage[labelsep=period]{caption}
+\renewcommand{\figurename}{Rys.}
+\renewcommand{\tablename}{Tab.}
+\renewcommand{\listfigurename}{Wykaz rysunków}
+\renewcommand{\listtablename}{Wykaz tabel}
+
+\usepackage{titlesec}
+
+\titleformat{\section}
+  {\normalfont\bfseries\fontsize{14}{16}\selectfont}
+  {\thesection}
+  {1em}
+  {\MakeUppercase}
+
+\titleformat{name=\section,numberless}
+  {\normalfont\bfseries\fontsize{14}{16}\selectfont}
+  {}
+  {0em}
+  {\MakeUppercase}
+
+\titleformat{\subsection}
+  {\normalfont\bfseries\fontsize{12}{14}\selectfont}
+  {\thesubsection}
+  {1em}
+  {}
+
+\titleformat{name=\subsection,numberless}
+  {\normalfont\bfseries\fontsize{12}{14}\selectfont}
+  {}
+  {0em}
+  {}
+
 \usepackage{csquotes}
-\usepackage{hyperref}
+\usepackage{url}
+
+\usepackage{xcolor}
 \usepackage{listings}
 \renewcommand{\lstlistingname}{Fragment kodu}
-\usepackage{xcolor}
+
 \usepackage{dirtree}
-\usepackage{booktabs}
 
-\geometry{margin=2.5cm}
-
-\title{Projekt i implementacja aplikacji sieciowej do analizy biomechaniki ciągu martwego na podstawie detekcji punktów kluczowych sylwetki z obrazu wideo}
-\author{Grzegorz Lewandowski}
-\date{2026}
+\usepackage{hyperref}
 
 \begin{document}
 
-\maketitle
+\onehalfspacing
 
+\input{chapters/00_tytul_i_oswiadczenie}
+
+\clearpage
+\pagenumbering{arabic}
+\setcounter{page}{7}
 \tableofcontents
+
 \newpage
 \input{chapters/01_wstep}
+
 \newpage
 \input{chapters/02_cel_i_zakres}
+
 \newpage
 \input{chapters/03_podstawy_teoretyczne}
+
 \newpage
 \input{chapters/04_analiza_wymagan}
+
 \newpage
 \input{chapters/05_projekt_systemu}
+
 \newpage
 \input{chapters/06_implementacja}
+
 \newpage
 \input{chapters/07_testy_i_wyniki}
+
 \newpage
 \input{chapters/08_podsumowanie}
+
 \newpage
+\addcontentsline{toc}{section}{Bibliografia}
 \bibliographystyle{plain}
 \bibliography{bibliography}
+
+\clearpage
+\addcontentsline{toc}{section}{Wykaz rysunków}
+\listoffigures
+
+\clearpage
+\addcontentsline{toc}{section}{Wykaz tabel}
+\listoftables
+
+\newpage
+\input{chapters/09_streszczenie}
 
 \end{document}
