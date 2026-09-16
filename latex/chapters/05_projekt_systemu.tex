@@ -68,11 +68,17 @@ Do głównych zadań backendu należą:
 
 Backend nie wykonuje samodzielnie obliczeń biomechanicznych. Nie wykrywa punktów kluczowych, nie dzieli nagrania na powtórzenia i nie ocenia techniki. Te zadania zostały pozostawione modułowi analitycznemu. Dzięki temu część serwerowa pozostaje odpowiedzialna głównie za obsługę żądań, zapis danych i połączenie z częścią analizującą nagranie.
 
-\subsection{Moduł analityczny}
+\subsection{Moduł analityczny DO OCENY}
 
 Moduł analityczny jest częścią systemu odpowiedzialną za przetworzenie nagrania wideo. W sensie implementacyjnym jest to wydzielona część projektu napisana w języku Python, uruchamiana z poziomu backendu po przesłaniu nagrania przez użytkownika. Wejściem modułu jest ścieżka do pliku wideo, a wyjściem struktura danych zawierająca wynik analizy.
 
 W module analitycznym wykorzystano gotowy model estymacji pozy człowieka \cite{mediapipe_pose_landmarker}. Model ten odpowiada za wykrywanie punktów kluczowych sylwetki w kolejnych klatkach nagrania. Dalsze przetwarzanie jest już realizowane przez kod przygotowany w ramach projektu. Obejmuje ono wybór potrzebnych punktów, obliczenie parametrów opisujących ruch, wykrycie powtórzeń oraz ocenę techniki.
+
+W module analizy wideo zastosowano wariant Heavy modelu MediaPipe Pose Landmarker. Spośród dostępnych wariantów Lite, Full i Heavy charakteryzuje się on największym kosztem obliczeniowym, ale jednocześnie osiąga najlepsze wyniki estymacji punktów kluczowych w testach przedstawionych przez twórców rozwiązania \cite{mediapipe_pose_docs}. Wybór tego wariantu wynika z charakteru projektowanego systemu. Analiza nie jest wykonywana w czasie rzeczywistym. Użytkownik najpierw przesyła nagranie do aplikacji, a następnie materiał jest przetwarzany po stronie serwera. Minimalizacja opóźnienia pojedynczego wywołania modelu nie stanowi więc podstawowego wymagania systemu. Większe znaczenie ma uzyskanie możliwie dobrej jakości estymacji punktów, ponieważ ich współrzędne stanowią dane wejściowe dla kolejnych etapów analizy biomechanicznej.
+
+Przyjęto również, że wybrane klatki nagrania są przekazywane do modelu jako niezależne obrazy. MediaPipe Pose Landmarker umożliwia pracę w trybie przeznaczonym dla materiału wideo, w którym informacje z poprzednich klatek mogą być wykorzystywane do śledzenia sylwetki w kolejnych klatkach \cite{mediapipe_pose_landmarker,bazarevsky2020blazepose}. W opracowanym systemie zastosowano natomiast tryb pojedynczego obrazu, dzięki czemu wynik estymacji dla analizowanej klatki nie zależy od poprawności śledzenia sylwetki w klatkach wcześniejszych.
+
+Decyzja ta wiąże się z większym kosztem obliczeniowym, ponieważ model nie wykorzystuje mechanizmu śledzenia do ograniczenia liczby ponownych detekcji. Koszt ten został zaakceptowany ze względu na zadaniowy charakter aplikacji oraz brak wymagania pracy w czasie rzeczywistym. Jednocześnie nie przyjęto założenia, że tryb pojedynczego obrazu jest sam w sobie dokładniejszy od trybu wideo. Celem tej decyzji było niezależne przetwarzanie kolejnych próbek obrazu i uniknięcie uzależnienia wyniku bieżącej klatki od stanu śledzenia wyznaczonego na podstawie klatek wcześniejszych.
 
 Proces działania modułu analitycznego można opisać następująco:
 
