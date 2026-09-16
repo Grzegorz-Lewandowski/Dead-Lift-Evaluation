@@ -1,0 +1,123 @@
+\section{Analiza wymagań systemu}
+
+Celem analizy wymagań jest określenie funkcji, które powinien realizować projektowany system, a także wskazanie ograniczeń wynikających z charakteru analizowanego problemu. System tworzony w ramach pracy ma charakter aplikacyjny. Jego zadaniem jest umożliwienie użytkownikowi przesłania nagrania wideo przedstawiającego wykonanie martwego ciągu, uruchomienie analizy po stronie serwera oraz przedstawienie wyników w formie możliwej do interpretacji bez znajomości szczegółów działania modelu estymacji pozy człowieka.
+
+Wymagania sformułowano z uwzględnieniem przyjętego zakresu pracy, w którym założono wykorzystanie gotowego modelu detekcji punktów kluczowych sylwetki, obliczanie wybranych parametrów biomechanicznych oraz prezentację wyników w aplikacji webowej.
+
+\subsection{Wymagania funkcjonalne}
+
+Wymagania funkcjonalne określają czynności, które system powinien umożliwiać użytkownikowi lub wykonywać automatycznie w ramach procesu analizy. Dla projektowanego systemu przyjęto następujące wymagania funkcjonalne:
+
+\begin{itemize}
+\item \textbf{WF-01} -- system powinien umożliwiać użytkownikowi przesłanie nagrania wideo przedstawiającego wykonanie martwego ciągu,
+\item \textbf{WF-02} -- system powinien przyjmować przesłane nagranie po stronie serwera,
+\item \textbf{WF-03} -- system powinien utworzyć zadanie analizy dla przesłanego nagrania,
+\item \textbf{WF-04} -- system powinien uruchamiać analizę przesłanego nagrania z wykorzystaniem wydzielonego modułu analizy wideo,
+\item \textbf{WF-05} -- system powinien przetwarzać nagranie klatka po klatce lub z ustalonym krokiem czasowym,
+\item \textbf{WF-06} -- system powinien wykrywać punkty kluczowe sylwetki osoby ćwiczącej,
+\item \textbf{WF-07} -- system powinien wyznaczać położenie wybranych stawów potrzebnych do analizy ruchu,
+\item \textbf{WF-08} -- system powinien identyfikować poszczególne powtórzenia ćwiczenia,
+\item \textbf{WF-09} -- system powinien obliczać wybrane parametry biomechaniczne dla wykrytych powtórzeń,
+\item \textbf{WF-10} -- system powinien generować ocenę techniki dla każdego wykrytego powtórzenia,
+\item \textbf{WF-11} -- system powinien klasyfikować powtórzenia jako poprawne, częściowe lub niepoprawne, jeżeli dane pozwalają na taką ocenę,
+\item \textbf{WF-12} -- system powinien generować komunikaty opisujące najważniejsze elementy techniki wymagające uwagi,
+\item \textbf{WF-13} -- system powinien zapisywać wynik analizy w postaci możliwej do zwrócenia przez interfejs programistyczny aplikacji,
+\item \textbf{WF-14} -- system powinien prezentować użytkownikowi ogólne podsumowanie analizy,
+\item \textbf{WF-15} -- system powinien prezentować szczegółowe informacje dotyczące poszczególnych powtórzeń,
+\item \textbf{WF-16} -- system powinien informować użytkownika o sytuacji, w której analiza nagrania zakończyła się niepowodzeniem.
+\end{itemize}
+
+Główne przypadki użycia systemu przedstawiono na rysunku~\ref{fig:diagram-przypadkow-uzycia}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{figures/diagram_przypadkow_uzycia.png}
+    \caption{Diagram przypadków użycia systemu analizy techniki martwego ciągu.}
+    \label{fig:diagram-przypadkow-uzycia}
+\end{figure}
+
+Diagram przedstawia funkcje systemu widoczne z perspektywy użytkownika. Nie uwzględniono na nim wewnętrznych operacji, takich jak detekcja punktów kluczowych sylwetki, identyfikacja powtórzeń czy obliczanie parametrów biomechanicznych, ponieważ są one elementami realizacji analizy nagrania, a nie samodzielnymi celami użytkownika.
+
+Zakres wymagań funkcjonalnych został ograniczony do funkcji bezpośrednio związanych z analizą pojedynczego nagrania. System nie obejmuje funkcji tworzenia kont użytkowników, prowadzenia długoterminowej historii treningowej ani generowania planów treningowych.
+
+\subsection{Wymagania niefunkcjonalne}
+
+Wymagania niefunkcjonalne opisują cechy systemu związane z jego działaniem, użytecznością, odpornością na błędy oraz organizacją kodu. Dla projektowanego rozwiązania przyjęto następujące wymagania niefunkcjonalne:
+
+\begin{itemize}
+\item \textbf{WN-01} -- interfejs użytkownika powinien być czytelny i umożliwiać łatwą interpretację wyników analizy,
+\item \textbf{WN-02} -- komunikaty prezentowane użytkownikowi powinny być zrozumiałe i nie powinny wymagać znajomości szczegółów działania algorytmu,
+\item \textbf{WN-03} -- wyniki analizy powinny być przedstawione w sposób uporządkowany, z podziałem na wynik ogólny oraz wyniki poszczególnych powtórzeń,
+\item \textbf{WN-04} -- system powinien oddzielać część kliencką od części serwerowej,
+\item \textbf{WN-05} -- moduł analizy nagrania powinien być wydzielony w sposób umożliwiający jego dalszy rozwój,
+\item \textbf{WN-06} -- struktura projektu powinna ułatwiać modyfikację poszczególnych elementów systemu, w szczególności reguł oceny techniki,
+\item \textbf{WN-07} -- system powinien obsługiwać sytuacje, w których analiza nagrania nie może zostać przeprowadzona poprawnie,
+\item \textbf{WN-08} -- system powinien zwracać użytkownikowi informację o statusie analizy,
+\item \textbf{WN-09} -- system powinien ograniczać interpretację wyników do wspomagania oceny techniki, bez sugerowania diagnozy medycznej,
+\item \textbf{WN-10} -- kod odpowiedzialny za analizę wideo powinien być możliwie niezależny od kodu odpowiedzialnego za obsługę żądań aplikacji webowej.
+\end{itemize}
+
+Przyjęte wymagania niefunkcjonalne wynikają z charakteru systemu, który łączy aplikację webową z modułem analizy obrazu. Szczególnie istotne jest oddzielenie warstw aplikacji, ponieważ część odpowiedzialna za analizę biomechaniczną może być rozwijana niezależnie od interfejsu użytkownika oraz warstwy serwerowej.
+
+\subsection{Użytkownik systemu}
+
+Docelowym użytkownikiem systemu jest osoba zainteresowana analizą techniki wykonania martwego ciągu. Może to być osoba ćwicząca rekreacyjnie, trener lub student analizujący ruch w celach edukacyjnych. Użytkownik nie musi posiadać wiedzy technicznej dotyczącej działania modeli estymacji pozy człowieka ani sposobu przetwarzania nagrania wideo.
+
+Z tego względu interfejs aplikacji powinien prezentować wyniki w sposób prosty i uporządkowany. Szczegółowe parametry biomechaniczne powinny być dostępne, ale główny wynik analizy powinien być możliwy do zrozumienia bez konieczności interpretowania surowych danych liczbowych. Istotne jest także, aby komunikaty nie sugerowały jednoznacznej diagnozy lub pełnej oceny eksperckiej, lecz wskazywały elementy ruchu, które mogą wymagać uwagi.
+\newpage
+\subsection{Dane wejściowe i wyjściowe}
+
+Danymi wejściowymi systemu jest nagranie wideo przedstawiające wykonanie martwego ciągu. Zakłada się, że nagranie powinno obejmować całą sylwetkę osoby ćwiczącej oraz przedstawiać ruch z perspektywy bocznej. Taka perspektywa ułatwia analizę kątów w stawach oraz przebiegu ruchu w płaszczyźnie strzałkowej.
+
+W celu zwiększenia jakości analizy przyjęto następujące założenia dotyczące nagrania:
+
+\begin{itemize}
+\item osoba ćwicząca powinna być widoczna przez cały czas trwania analizowanego ruchu,
+\item kamera powinna być ustawiona możliwie stabilnie,
+\item nagranie powinno obejmować całą sylwetkę osoby ćwiczącej,
+\item ruch powinien być nagrany z boku, tak aby możliwa była analiza kąta biodra, kolana i tułowia,
+\item w kadrze powinna znajdować się jedna dominująca osoba wykonująca ćwiczenie,
+\item jakość obrazu powinna pozwalać na wykrycie punktów kluczowych sylwetki.
+\end{itemize}
+
+Danymi wyjściowymi systemu są wyniki analizy nagrania. Obejmują one przede wszystkim:
+
+\begin{itemize}
+\item informację o liczbie wykrytych powtórzeń,
+\item ocenę każdego wykrytego powtórzenia,
+\item klasyfikację powtórzenia jako poprawnego, częściowego lub niepoprawnego,
+\item wybrane parametry biomechaniczne, takie jak kąty w stawie biodrowym i kolanowym,
+\item informacje pomocnicze dotyczące przebiegu ruchu,
+\item komunikaty wskazujące potencjalne błędy techniczne lub elementy wymagające uwagi,
+\item informację o spójności wykonania powtórzeń w ramach jednej serii,
+\item status analizy informujący o jej zakończeniu lub niepowodzeniu.
+\end{itemize}
+\newpage
+Przepływ danych od nagrania wejściowego do wyników prezentowanych użytkownikowi przedstawiono na rysunku~\ref{fig:diagram-przeplywu-danych}.
+\begin{figure}[H]
+    \centering
+    \includegraphics[height=0.58\textheight,keepaspectratio]{figures/diagram_przeplywu_danych.png}
+    \caption{Przepływ danych w procesie analizy nagrania.}
+    \label{fig:diagram-przeplywu-danych}
+\end{figure}
+
+\subsection{Ograniczenia projektowe}
+
+Na etapie projektowania przyjęto ograniczenia wynikające z charakteru pracy oraz zastosowanej metody analizy. System nie jest przeznaczony do medycznej diagnostyki ruchu ani do zastępowania oceny specjalisty. Jego zadaniem jest wspomaganie analizy techniki poprzez automatyczne wyznaczenie wybranych parametrów oraz przedstawienie ich użytkownikowi.
+
+Do najważniejszych ograniczeń należą:
+
+\begin{itemize}
+\item zależność jakości analizy od jakości nagrania,
+\item wymóg dobrej widoczności sylwetki osoby ćwiczącej,
+\item ograniczenie analizy do obrazu dwuwymiarowego,
+\item zależność wyników od poprawności wykrywania punktów kluczowych,
+\item możliwość wystąpienia błędów wykrywania punktów kluczowych w przypadku zasłonięcia sylwetki,
+\item uproszczony charakter reguł oceny techniki,
+\item brak pomiaru rzeczywistych sił działających na ciało osoby ćwiczącej,
+\item brak analizy obciążenia zewnętrznego, jeżeli nie wynika ono bezpośrednio z obrazu,
+\item brak możliwości pełnej oceny ustawienia kręgosłupa na podstawie samej analizy dwuwymiarowej,
+\item konieczność interpretowania wyników jako informacji pomocniczych, a nie jako ostatecznej oceny eksperckiej.
+\end{itemize}
+
+Ograniczenia te nie uniemożliwiają realizacji celu pracy, ponieważ projektowany system ma służyć do automatycznego wspomagania analizy, a nie do pełnego zastępowania trenera, fizjoterapeuty lub specjalistycznego systemu pomiarowego. Przyjęte uproszczenia są zgodne z aplikacyjnym charakterem pracy oraz z założeniem wykorzystania gotowego modelu estymacji pozy człowieka.
