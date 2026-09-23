@@ -2,37 +2,37 @@
 
 W niniejszym rozdziale przedstawiono projekt systemu informatycznego służącego do analizy techniki martwego ciągu na podstawie nagrania wideo. Rozdział stanowi przejście pomiędzy analizą wymagań a opisem implementacji. Z tego względu skupiono się w nim na ogólnej organizacji aplikacji, podziale odpowiedzialności pomiędzy jej główne części oraz sposobie przepływu danych od przesłania nagrania do wyświetlenia wyniku.
 
-System został zaprojektowany jako aplikacja sieciowa składająca się z trzech głównych części: aplikacji klienckiej, aplikacji serwerowej oraz modułu analitycznego napisanego w języku Python. W dalszej części pracy aplikacja kliencka określana jest również jako frontend, natomiast aplikacja serwerowa jako backend. Pojęcia te są stosowane ze względu na ich powszechne użycie w projektach aplikacji webowych oraz bezpośrednie odniesienie do struktury zaimplementowanego projektu.
+System został zaprojektowany jako aplikacja sieciowa składająca się z trzech głównych części: aplikacji klienckiej, aplikacji serwerowej oraz modułu analitycznego zaimplementowanego w języku Python. W dalszej części pracy aplikacja kliencka określana jest również jako frontend, natomiast aplikacja serwerowa jako backend. Pojęcia te stosowane są ze względu na ich powszechne wykorzystanie w projektach aplikacji sieciowych oraz bezpośrednie odniesienie do struktury zaimplementowanego projektu.
 
-Frontend odpowiada za kontakt z użytkownikiem, czyli wybór pliku wideo, przesłanie go do analizy oraz prezentację wyniku. Backend przyjmuje nagranie, zapisuje informacje o analizie i uruchamia moduł analityczny. Moduł analityczny przetwarza nagranie oraz zwraca wynik w postaci danych, które mogą zostać zapisane po stronie serwera i pokazane w interfejsie użytkownika.
+Frontend odpowiada za kontakt z użytkownikiem, czyli wybór pliku wideo, przesłanie go do analizy oraz prezentację wyniku. Backend przyjmuje nagranie, zapisuje informacje o analizie i uruchamia moduł analityczny. Moduł analityczny przetwarza nagranie oraz zwraca wynik w postaci danych, które mogą zostać zapisane po stronie serwera i przedstawione w interfejsie użytkownika.
 
-    
 \subsection{Ogólna struktura systemu}
 
-Podstawowym założeniem projektowym było rozdzielenie części odpowiedzialnej za obsługę użytkownika od części odpowiedzialnej za analizę nagrania. Użytkownik nie uruchamia bezpośrednio programu analizującego wideo. Korzysta jedynie z aplikacji webowej, przez którą wybiera plik i otrzymuje wynik. Backend pełni w tym układzie rolę pośrednika pomiędzy interfejsem użytkownika a modułem analitycznym.
+Podstawowym założeniem projektowym było rozdzielenie obsługi użytkownika od analizy nagrania. Użytkownik nie uruchamia bezpośrednio programu analizującego wideo. Korzysta jedynie z aplikacji sieciowej, za pośrednictwem której wybiera plik i otrzymuje wynik. Backend pełni w tym układzie rolę pośrednika pomiędzy interfejsem użytkownika a modułem analitycznym.
 
 Na poziomie projektu wyróżniono następujące części systemu:
 
 \begin{itemize}
 \item \textbf{frontend} -- aplikacja kliencka uruchamiana w przeglądarce internetowej,
 \item \textbf{backend} -- aplikacja serwerowa odpowiedzialna za obsługę żądań i zapisywanie danych analizy,
-\item \textbf{moduł analityczny} -- oddzielny program, odpowiedzialny za właściwą analizę nagrania.
+\item \textbf{moduł analityczny} -- wydzielona część systemu odpowiedzialna za właściwą analizę nagrania.
 \end{itemize}
 
-Taki podział odpowiada rzeczywistej strukturze projektu. Frontend i backend są oddzielnymi częściami aplikacji webowej, natomiast moduł analityczny znajduje się poza kodem odpowiedzialnym za obsługę żądań HTTP. Dzięki temu kod związany z analizą ruchu nie jest mieszany z kodem odpowiedzialnym za interfejs użytkownika oraz komunikację sieciową.
+Taki podział odpowiada rzeczywistej strukturze projektu. Frontend i backend są oddzielnymi częściami aplikacji sieciowej, natomiast moduł analityczny znajduje się poza kodem odpowiedzialnym za obsługę żądań HTTP. Dzięki temu kod związany z analizą ruchu jest oddzielony od kodu odpowiedzialnego za interfejs użytkownika oraz komunikację sieciową.
+
 \newpage
 Ogólną architekturę systemu przedstawiono na rysunku~\ref{fig:diagram-architektury-systemu}.
 
 \begin{figure}[H]
-    \centering
-    \includegraphics[width=0.95\textwidth]{figures/diagram_architektury_systemu.png}
-    \caption{Architektura systemu analizy techniki martwego ciągu. \newline Źródło: opracowanie własne.}
-    \label{fig:diagram-architektury-systemu}
+\centering
+\includegraphics[width=0.95\textwidth]{figures/diagram_architektury_systemu.png}
+\caption{Architektura systemu analizy techniki martwego ciągu. \newline Źródło: opracowanie własne.}
+\label{fig:diagram-architektury-systemu}
 \end{figure}
 
 \subsection{Aplikacja kliencka}
 
-Aplikacja kliencka jest częścią systemu widoczną dla użytkownika. Jej zadaniem jest umożliwienie przesłania nagrania wideo oraz przedstawienie wyniku analizy w czytelnej formie. Użytkownik powinien móc wykonać całą operację bez znajomości szczegółów działania modelu estymacji pozy człowieka oraz bez kontaktu z kodem modułu analitycznego.
+Aplikacja kliencka jest częścią systemu widoczną dla użytkownika. Jej zadaniem jest umożliwienie przesłania nagrania wideo oraz przedstawienie wyniku analizy w czytelnej formie. Użytkownik powinien móc wykonać całą operację bez znajomości szczegółów działania modelu estymacji pozy człowieka oraz bez bezpośredniego kontaktu z modułem analitycznym.
 
 W części klienckiej przewidziano następujące zadania:
 
@@ -46,13 +46,13 @@ W części klienckiej przewidziano następujące zadania:
 \item pokazanie komunikatu błędu, jeżeli analiza nie zakończy się poprawnie.
 \end{itemize}
 
-Interfejs użytkownika powinien w pierwszej kolejności prezentować wynik ogólny, a dopiero później szczegóły dotyczące poszczególnych powtórzeń. Jest to ważne, ponieważ użytkownik nie powinien być od razu zasypany wszystkimi danymi liczbowymi. Szczegółowe informacje mają pełnić funkcję pomocniczą i pozwalać na dokładniejsze przejrzenie wyniku wtedy, gdy użytkownik chce sprawdzić, skąd wynika dana ocena.
+Interfejs użytkownika powinien w pierwszej kolejności prezentować wynik ogólny, a dopiero później szczegóły dotyczące poszczególnych powtórzeń. Jest to istotne, ponieważ użytkownik nie powinien być od razu obciążany dużą liczbą szczegółowych danych liczbowych. Szczegółowe informacje mają pełnić funkcję pomocniczą i umożliwiać dokładniejsze przejrzenie wyniku wtedy, gdy użytkownik chce sprawdzić, z czego wynika dana ocena.
 
 \subsection{Aplikacja serwerowa}
 
-Backend odpowiada za przyjęcie nagrania przesłanego z frontendu oraz za uruchomienie analizy. Po otrzymaniu żądania backend tworzy rekord analizy na podstawie przesłanych danych i zapisuje w nim plik wideo. Początkowo analiza otrzymuje status oczekujący. Następnie status zostaje zmieniony na informujący o rozpoczęciu przetwarzania, a backend przekazuje ścieżkę zapisanego pliku do modułu analitycznego. Następnie status analizy zmieniany jest na informujący o rozpoczęciu przetwarzania, a backend przekazuje ścieżkę zapisanego pliku do modułu analitycznego.
+Backend odpowiada za przyjęcie nagrania przesłanego z frontendu oraz uruchomienie analizy. Po otrzymaniu żądania tworzy rekord analizy na podstawie przesłanych danych i zapisuje w nim plik wideo. Początkowo analiza otrzymuje status informujący o oczekiwaniu na rozpoczęcie przetwarzania. Następnie status zostaje zmieniony na informujący o rozpoczęciu analizy, a backend przekazuje ścieżkę zapisanego pliku do modułu analitycznego.
 
-Dla każdej przesłanej analizy przechowywany jest status, który informuje, czy analiza oczekuje na wykonanie, jest przetwarzana, zakończyła się poprawnie, albo zakończyła się błędem. Pozwala to odróżnić analizę oczekującą, analizę w trakcie przetwarzania, analizę zakończoną poprawnie oraz analizę zakończoną błędem. Oprócz statusu przechowywany jest także plik wideo, wynik analizy, ewentualny komunikat błędu oraz czas rozpoczęcia i zakończenia przetwarzania.
+Dla każdej przesłanej analizy przechowywany jest status informujący, czy analiza oczekuje na wykonanie, jest przetwarzana, zakończyła się poprawnie czy zakończyła się błędem. Oprócz statusu przechowywany jest także plik wideo, wynik analizy, ewentualny komunikat błędu oraz czas rozpoczęcia i zakończenia przetwarzania.
 
 Do głównych zadań backendu należą:
 
@@ -66,25 +66,25 @@ Do głównych zadań backendu należą:
 \item zwrócenie odpowiedzi do aplikacji klienckiej.
 \end{itemize}
 
-Backend nie wykonuje samodzielnie obliczeń biomechanicznych. Nie wykrywa punktów kluczowych, nie dzieli nagrania na powtórzenia i nie ocenia techniki. Te zadania zostały pozostawione modułowi analitycznemu. Dzięki temu część serwerowa pozostaje odpowiedzialna głównie za obsługę żądań, zapis danych i połączenie z częścią analizującą nagranie.
+Backend nie wykonuje samodzielnie obliczeń biomechanicznych. Nie wykrywa punktów kluczowych, nie dzieli nagrania na powtórzenia i nie ocenia techniki. Zadania te zostały przypisane modułowi analitycznemu. Dzięki temu część serwerowa pozostaje odpowiedzialna głównie za obsługę żądań, zapis danych oraz komunikację z modułem analitycznym.
 
 \subsection{Moduł analityczny DO OCENY}
 
-Moduł analityczny jest częścią systemu odpowiedzialną za przetworzenie nagrania wideo. W sensie implementacyjnym jest to wydzielona część projektu napisana w języku Python, uruchamiana z poziomu backendu po przesłaniu nagrania przez użytkownika. Wejściem modułu jest ścieżka do pliku wideo, a wyjściem struktura danych zawierająca wynik analizy.
+Moduł analityczny jest częścią systemu odpowiedzialną za przetworzenie nagrania wideo. Z punktu widzenia implementacji jest to wydzielona część projektu napisana w języku Python, uruchamiana z poziomu backendu po przesłaniu nagrania przez użytkownika. Wejściem modułu jest ścieżka do pliku wideo, a jego wyjściem jest struktura danych zawierająca wynik analizy.
 
-W module analitycznym wykorzystano gotowy model estymacji pozy człowieka \cite{mediapipe_pose_landmarker}. Model ten odpowiada za wykrywanie punktów kluczowych sylwetki w kolejnych klatkach nagrania. Dalsze przetwarzanie jest już realizowane przez kod przygotowany w ramach projektu. Obejmuje ono wybór potrzebnych punktów, obliczenie parametrów opisujących ruch, wykrycie powtórzeń oraz ocenę techniki.
+W module analitycznym wykorzystano gotowy model estymacji pozy człowieka \cite{mediapipe_pose_landmarker}. Model ten odpowiada za wykrywanie punktów kluczowych sylwetki w kolejnych klatkach nagrania. Dalsze przetwarzanie realizowane jest przez kod przygotowany w ramach projektu. Obejmuje ono wybór potrzebnych punktów, obliczenie parametrów opisujących ruch, wykrycie powtórzeń oraz ocenę techniki.
 
-W module analizy wideo zastosowano wariant Heavy modelu MediaPipe Pose Landmarker. Spośród dostępnych wariantów Lite, Full i Heavy charakteryzuje się on największym kosztem obliczeniowym, ale jednocześnie osiąga najlepsze wyniki estymacji punktów kluczowych w testach przedstawionych przez twórców rozwiązania \cite{mediapipe_pose_docs}. Wybór tego wariantu wynika z charakteru projektowanego systemu. Analiza nie jest wykonywana w czasie rzeczywistym. Użytkownik najpierw przesyła nagranie do aplikacji, a następnie materiał jest przetwarzany po stronie serwera. Minimalizacja opóźnienia pojedynczego wywołania modelu nie stanowi więc podstawowego wymagania systemu. Większe znaczenie ma uzyskanie możliwie dobrej jakości estymacji punktów, ponieważ ich współrzędne stanowią dane wejściowe dla kolejnych etapów analizy biomechanicznej.
+W module analizy wideo zastosowano wariant Heavy modelu MediaPipe Pose Landmarker. Spośród dostępnych wariantów Lite, Full i Heavy charakteryzuje się on największym kosztem obliczeniowym, ale jednocześnie osiąga najlepsze wyniki estymacji punktów kluczowych w testach przedstawionych przez twórców rozwiązania \cite{mediapipe_pose_docs}. Wybór tego wariantu wynika z charakteru projektowanego systemu. Analiza nie jest wykonywana w czasie rzeczywistym. Użytkownik najpierw przesyła nagranie do aplikacji, a następnie materiał jest przetwarzany po stronie serwera. Czas przetwarzania pojedynczej klatki nie stanowi więc najważniejszego kryterium wyboru modelu. Większe znaczenie ma uzyskanie możliwie dobrej jakości estymacji punktów, ponieważ ich współrzędne stanowią dane wejściowe dla kolejnych etapów analizy biomechanicznej.
 
 Przyjęto również, że wybrane klatki nagrania są przekazywane do modelu jako niezależne obrazy. MediaPipe Pose Landmarker umożliwia pracę w trybie przeznaczonym dla materiału wideo, w którym informacje z poprzednich klatek mogą być wykorzystywane do śledzenia sylwetki w kolejnych klatkach \cite{mediapipe_pose_landmarker,bazarevsky2020blazepose}. W opracowanym systemie zastosowano natomiast tryb pojedynczego obrazu, dzięki czemu wynik estymacji dla analizowanej klatki nie zależy od poprawności śledzenia sylwetki w klatkach wcześniejszych.
 
-Decyzja ta wiąże się z większym kosztem obliczeniowym, ponieważ model nie wykorzystuje mechanizmu śledzenia do ograniczenia liczby ponownych detekcji. Koszt ten został zaakceptowany ze względu na zadaniowy charakter aplikacji oraz brak wymagania pracy w czasie rzeczywistym. Jednocześnie nie przyjęto założenia, że tryb pojedynczego obrazu jest sam w sobie dokładniejszy od trybu wideo. Celem tej decyzji było niezależne przetwarzanie kolejnych próbek obrazu i uniknięcie uzależnienia wyniku bieżącej klatki od stanu śledzenia wyznaczonego na podstawie klatek wcześniejszych.
+Decyzja ta wiąże się z większym kosztem obliczeniowym, ponieważ model nie wykorzystuje mechanizmu śledzenia do ograniczenia liczby ponownych detekcji. Koszt ten został zaakceptowany ze względu na sposób działania aplikacji oraz brak wymagania pracy w czasie rzeczywistym. Jednocześnie nie przyjęto założenia, że tryb pojedynczego obrazu jest sam w sobie dokładniejszy od trybu wideo. Celem tej decyzji było niezależne przetwarzanie kolejnych próbek obrazu i uniknięcie uzależnienia wyniku bieżącej klatki od stanu śledzenia wyznaczonego na podstawie klatek wcześniejszych.
 
 Proces działania modułu analitycznego można opisać następująco:
 
 \begin{itemize}
 \item wczytanie nagrania wideo,
-\item przejście przez kolejne klatki nagrania,
+\item przetwarzanie kolejnych klatek nagrania,
 \item wykrycie punktów kluczowych sylwetki,
 \item zapisanie danych o położeniu punktów w czasie,
 \item wyznaczenie pozycji sztangi na podstawie wybranych punktów,
@@ -95,7 +95,7 @@ Proces działania modułu analitycznego można opisać następująco:
 \item zwrócenie wyniku do backendu.
 \end{itemize}
 
-Wewnątrz modułu analitycznego można wyróżnić kilka etapów, ale nie są one osobnymi modułami systemu widocznymi z zewnątrz. Są to raczej kolejne kroki przetwarzania wykonywane w ramach jednej części projektu. Szczegółowy opis ich implementacji zostanie przedstawiony w kolejnym rozdziale.
+Wewnątrz modułu analitycznego można wyróżnić kilka etapów przetwarzania, jednak nie są one osobnymi modułami systemu widocznymi z zewnątrz. Stanowią kolejne kroki wykonywane w ramach jednej części projektu. Szczegółowy opis ich implementacji zostanie przedstawiony w kolejnym rozdziale.
 
 \subsection{Przepływ danych w systemie}
 

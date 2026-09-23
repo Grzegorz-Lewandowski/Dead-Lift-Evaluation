@@ -49,34 +49,17 @@ Skupiając się na analizie kinematycznej materiału wideo, system nie będzie w
 \item kąt w stawie kolanowym,
 \item orientacja tułowia względem kończyn dolnych,
 \item położenie bioder, barków, kolan i kostek w czasie,
-\item zakres ruchu w pojedynczym powtórzeniu,
-\item podobieństwo kolejnych powtórzeń względem siebie,
-\item stabilność przebiegu ruchu w fazie podnoszenia i opuszczania.
 \end{itemize}
 
 Kąt w stawie biodrowym może zostać przybliżony na podstawie położenia barku, biodra i kolana. W uproszczeniu opisuje on relację pomiędzy tułowiem a udem. Kąt w stawie kolanowym może zostać obliczony na podstawie położenia biodra, kolana i kostki, dzięki czemu możliwe jest określenie stopnia ugięcia kończyn dolnych \cite{mediapipe_pose_docs,hanen2025deadlift}. Zmiany tych wartości w czasie pozwalają opisać sposób rozpoczęcia ruchu, moment osiągnięcia wyprostu oraz zakres pracy kończyn dolnych \cite{hanen2025deadlift}.
 
 W analizie techniki martwego ciągu istotne jest nie tylko osiągnięcie pozycji końcowej, lecz także przebieg całego ruchu \cite{hanen2025deadlift}. Przykładowo, zbyt szybkie prostowanie kolan przy jednoczesnym pozostawaniu bioder w niskiej pozycji lub zbyt szybkie unoszenie bioder bez ruchu barków może świadczyć o zaburzonej koordynacji ruchu. Z tego powodu analiza powinna uwzględniać zmiany kątów w czasie, a nie wyłącznie pojedyncze wartości odczytane z jednej klatki nagrania \cite{mundt2024twodimensional}.
 
-W praktyce systemu informatycznego parametry biomechaniczne mogą być wykorzystywane do tworzenia prostych reguł oceny \cite{wade2022markerless}. Przykładowo, powtórzenie może zostać uznane za niepełne, jeżeli w końcowej fazie ruchu nie zostanie osiągnięty odpowiedni zakres wyprostu bioder lub kolan. System może również wskazywać powtórzenia wymagające uwagi, jeżeli ich parametry znacząco odbiegają od pozostałych powtórzeń w serii. Takie podejście nie zastępuje oceny trenerskiej, ale pozwala na automatyczne wychwycenie wybranych cech ruchu \cite{wade2022markerless}.
-
 \subsection{Analiza obrazu wideo w ocenie ruchu}
 
 Nagranie wideo jest sekwencją klatek. W każdej analizowanej klatce możliwe jest określenie położenia wybranych punktów sylwetki, a następnie zapisanie ich współrzędnych \cite{mediapipe_pose_landmarker}. Po połączeniu informacji z wielu klatek otrzymuje się przebieg ruchu w czasie \cite{mundt2024twodimensional}. Tak przygotowane dane mogą zostać wykorzystane do obliczania kątów, wykrywania faz ćwiczenia oraz oceny powtarzalności kolejnych powtórzeń \cite{mundt2024twodimensional}.
 
 Nie jest konieczne wykonywanie dalszej analizy dla każdej klatki nagrania. W ruchu takim jak martwy ciąg zmiany położenia sylwetki pomiędzy bezpośrednio sąsiadującymi klatkami są niewielkie, dlatego możliwe jest przetwarzanie obrazu z wybranym interwałem. Pozwala to ograniczyć liczbę wykonywanych obliczeń przy zachowaniu wystarczającej rozdzielczości czasowej do opisania przebiegu ćwiczenia. Niezależnie od częstotliwości analizy wyniki estymacji mogą podlegać niewielkim wahaniom pomiędzy kolejnymi klatkami, dlatego ich stabilizacja wymaga oddzielnego przetwarzania przebiegów czasowych \cite{wade2022markerless}.
-
-Proces analizy wideo można przedstawić jako ciąg następujących etapów:
-\begin{itemize}
-\item wczytanie nagrania przesłanego przez użytkownika,
-\item podział nagrania na pojedyncze klatki,
-\item wykrycie punktów kluczowych sylwetki w klatkach co wybrany interwał,
-\item zapis współrzędnych punktów w czasie,
-\item obliczenie wybranych parametrów biomechanicznych,
-\item wykrycie pojedynczych powtórzeń,
-\item ocena powtórzeń z wykorzystaniem zaimplementowanych reguł,
-\item prezentacja wyników użytkownikowi.
-\end{itemize}
 
 W przypadku analizy martwego ciągu szczególnie korzystne jest nagranie z perspektywy bocznej \cite{hanen2025deadlift,wade2022markerless}. Z takiej perspektywy możliwe jest czytelne obserwowanie zmian kątów zgięcia stawów, pochylenia tułowia oraz drogi pokonanej przez sztangę. Ustawienie kamery pod kątem względem ćwiczącego, na zbyt małej odległości lub zakrycie części sylwetki może znacząco wpływać na dokładność uzyskanych wyników \cite{wade2022markerless}. Z tego powodu jakość danych wejściowych ma bezpośredni wpływ na parametry wyznaczane przez system.
 
@@ -138,9 +121,7 @@ W systemach analizujących ruch człowieka model uczenia maszynowego może stano
 
 Wynikiem działania modelu są współrzędne punktów opisujących położenie wybranych części ciała oraz dodatkowe informacje dotyczące ich widoczności. Dane te stanowią dopiero wejście do dalszych etapów opracowanego systemu. Na ich podstawie wykonywane są obliczenia geometryczne, między innymi wyznaczanie kątów w stawach oraz analiza zmian położenia wybranych punktów w kolejnych klatkach nagrania.
 
-Właściwa interpretacja przebiegu martwego ciągu realizowana jest poza modelem uczenia maszynowego. Zaimplementowane algorytmy analizują zmiany wartości obliczonych parametrów w czasie, identyfikują kolejne fazy ruchu, wykrywają pojedyncze powtórzenia, wyznaczają ich parametry oraz porównują uzyskane wartości z przyjętymi kryteriami oceny techniki. Model estymacji pozy nie został więc wytrenowany do rozpoznawania poprawnego lub niepoprawnego wykonania martwego ciągu i nie zwraca takiej klasyfikacji bezpośrednio.
-
-Takie rozdzielenie odpowiedzialności pozwala wykorzystać gotowy model estymacji pozy jako źródło danych opisujących ruch, a jednocześnie zachować kontrolę nad sposobem ich późniejszej interpretacji. Reguły związane z wykrywaniem powtórzeń i oceną wybranych cech techniki zostały zaimplementowane jako część opracowanego systemu i mogą być modyfikowane niezależnie od modelu odpowiedzialnego za estymację punktów kluczowych.
+Dalsza interpretacja uzyskanych punktów oraz ocena ruchu realizowane są poza modelem uczenia maszynowego za pomocą opracowanych algorytmów regułowych.
 
 \subsection{Punkty kluczowe sylwetki i obliczanie kątów DO OCENY}
 
@@ -178,26 +159,9 @@ Jeżeli dane są trzy punkty: $A$, $B$ oraz $C$, gdzie punkt $B$ jest wierzchoł
 \right).
 \end{equation}
 
-Wartość kąta uzyskana podczas analizy pojedynczej klatki odpowiada przybliżonemu ułożeniu części ciała w danym momencie ruchu \cite{wade2022markerless}. Dopiero przeprowadzenie analizy wielu klatek po naniesieniu ich na oś czasu pozwala określić przebieg ruchu w czasie \cite{mundt2024twodimensional}. Dzięki temu możliwe jest wyodrębnienie oddzielnych faz ruchu: przygotowawczej, podnoszenia, kończącej ruch, odkładania ciężaru oraz bezczynnej \cite{mundt2024twodimensional}.
+Wartość kąta uzyskana podczas analizy pojedynczej klatki odpowiada przybliżonemu ułożeniu części ciała w danym momencie ruchu \cite{wade2022markerless}. Analiza kolejnych wartości pozwala następnie opisać zmianę ułożenia sylwetki w czasie.
 
-Wartości obliczane na podstawie punktów kluczowych mogą podlegać niewielkim wahaniom wynikającym z niedokładności estymacji \cite{wade2022markerless}. Model może w jednej klatce wskazać punkt nieco wyżej lub niżej niż w klatce poprzedniej, mimo że rzeczywisty ruch był płynny. Z tego powodu w analizie ruchu stosowane może być dodatkowe przetwarzanie wyników, takie jak filtrowanie, wygładzanie przebiegów czasowych lub pomijanie danych, dla których jakość estymacji jest niewystarczająca \cite{wade2022markerless}. Uzyskanie stabilnych przebiegów ma znaczenie dla późniejszego wykrywania faz i oceny powtórzeń.
-
-\subsection{Wykrywanie powtórzeń i ocena techniki}
-
-Wykrywanie powtórzeń polega na podziale ciągłego nagrania na fragmenty odpowiadające pojedynczym wykonaniom ćwiczenia \cite{mundt2024twodimensional}. W martwym ciągu powtórzenie można opisać jako przejście od pozycji początkowej, przez fazę podnoszenia i osiągnięcie pozycji wyprostowanej, do kontrolowanego powrotu do pozycji początkowej \cite{hanen2025deadlift}. Automatyczne rozpoznanie tych etapów może zostać wykonane na podstawie zmian położenia punktów kluczowych oraz zmian wartości kątów w czasie \cite{mediapipe_pose_landmarker,mundt2024twodimensional}.
-
-W analizowanym ćwiczeniu szczególnie użyteczne są wartości opisujące ustawienie bioder, kolan oraz śledzenie pozycji gryfu \cite{hanen2025deadlift}. W pozycji początkowej stawy biodrowe i kolanowe są ugięte, natomiast w pozycji końcowej powinny osiągnąć większy stopień wyprostu \cite{hanen2025deadlift}. Z tego powodu przebieg kąta biodrowego i kolanowego może zostać wykorzystany do określenia, czy użytkownik faktycznie wykonał pełne powtórzenie \cite{hanen2025deadlift,mundt2024twodimensional}. Dodatkowo, śledząc ruch sztangi przy założeniu, że kamera jest statyczna, otrzymywana jest informacja o zakresie danego powtórzenia. Jeżeli zakres zmiany kątów jest zbyt mały lub tor ruchu za krótki, powtórzenie może zostać oznaczone jako niepełne lub wymagające uwagi \cite{mundt2024twodimensional}.
-
-Ocena techniki w projektowanym systemie opiera się na wybranych, mierzalnych cechach ruchu \cite{wade2022markerless}. Do przykładowych kryteriów należą:
-\begin{itemize}
-\item osiągnięcie odpowiedniego wyprostu w pozycji końcowej,
-\item zachowanie wystarczającego zakresu ruchu,
-\item podobieństwo kolejnych powtórzeń w serii,
-\item brak nadmiernych odchyleń wybranych parametrów względem typowego przebiegu,
-\item stabilność pozycji tułowia i kończyn dolnych w analizowanej płaszczyźnie.
-\end{itemize}
-
-Wyniki oceny powinny być traktowane jako informacja pomocnicza, a nie jako jednoznaczna diagnoza poprawności techniki \cite{wade2022markerless}. System może wykazać odchylenia od przyjętych kryteriów, ale do pełnego potwierdzenia błędów wymagana jest ocena wykonana przez trenera, fizjoterapeutę lub specjalistę biomechaniki. Wynika to z ograniczeń analizy wykonywanej na podstawie pojedynczego, dwuwymiarowego nagrania.
+Wartości obliczane na podstawie punktów kluczowych mogą podlegać niewielkim wahaniom wynikającym z niedokładności estymacji \cite{wade2022markerless}. Model może w jednej klatce wskazać punkt nieco wyżej lub niżej niż w klatce poprzedniej, mimo że rzeczywisty ruch był płynny. Z tego powodu w analizie ruchu może być stosowane dodatkowe przetwarzanie wyników, takie jak filtrowanie lub wygładzanie przebiegów czasowych \cite{wade2022markerless}.
 
 \subsection{Ograniczenia analizy na podstawie obrazu wideo DO OCENY}
 
@@ -222,6 +186,6 @@ Na jakość estymacji mogą wpływać także przesłonięcia powstające podczas
 
 \subsection{Znaczenie omawianych zagadnień dla projektowanego systemu}
 
-Przedstawione podstawy teoretyczne są niezbędnymi komponentami potrzebnymi do zaprojektowania działającego systemu analizy. Teoria poprawnego wykonania ruchu definiuje, na jakie cechy należy zwrócić uwagę \cite{hanen2025deadlift,ramirez2022lowback}. Analiza biomechaniczna pozwala wskazać parametry, które można wykorzystać do ich oceny \cite{hanen2025deadlift}. Model estymacji pozy umożliwia natomiast przekształcenie obrazu wejściowego w zestaw współrzędnych opisujących sylwetkę bez stosowania specjalistycznego sprzętu pomiarowego \cite{mediapipe_pose_landmarker,wade2022markerless}.
+Przedstawione zagadnienia stanowią podstawę opracowanej metody analizy. Wiedza dotycząca biomechaniki martwego ciągu pozwala wskazać cechy ruchu istotne z punktu widzenia jego oceny \cite{hanen2025deadlift,ramirez2022lowback}, natomiast estymacja pozy umożliwia uzyskanie z nagrania współrzędnych punktów kluczowych potrzebnych do wyznaczenia analizowanych parametrów \cite{mediapipe_pose_landmarker,wade2022markerless}.
 
-W projektowanym rozwiązaniu gotowy model estymacji pozy pełni funkcję modułu wyznaczającego punkty kluczowe sylwetki \cite{mediapipe_pose_landmarker}. Następnie zaimplementowany moduł analizy przekształca te punkty w wartości liczbowe, takie jak kąty w stawie biodrowym i kolanowym. Na podstawie zmian tych wartości w czasie możliwe jest wykrywanie powtórzeń oraz przypisanie im statusu oceny \cite{mundt2024twodimensional}. Takie podejście łączy gotowy model uczenia maszynowego z regułową interpretacją parametrów biomechanicznych.
+Sposób wykorzystania tych parametrów do identyfikacji powtórzeń oraz ich regułowej oceny przedstawiono w kolejnym rozdziale.
