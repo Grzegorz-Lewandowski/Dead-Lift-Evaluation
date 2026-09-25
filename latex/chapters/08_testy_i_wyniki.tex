@@ -1,0 +1,248 @@
+\section{Testy systemu i wyniki analizy}
+
+Po zakończeniu implementacji przeprowadzono testy działania systemu oraz analizę wyników uzyskanych dla wybranych nagrań martwego ciągu. Celem tego etapu było sprawdzenie, czy zaimplementowane rozwiązanie realizuje główny przebieg działania opisany we wcześniejszych rozdziałach oraz jak zachowuje się w przypadku materiałów o różnej charakterystyce.
+
+Testy miały charakter funkcjonalny i jakościowy. Nie przygotowywano dużego, ręcznie oznaczonego zbioru danych referencyjnych, dlatego przedstawione wyniki nie stanowią statystycznej oceny skuteczności modelu ani pełnej walidacji reguł oceny techniki. Skupiono się na sprawdzeniu działania kompletnego systemu oraz jakościowej analizie wybranych przypadków testowych.
+
+W dalszej części rozdziału przedstawiono cel i zakres testów, środowisko testowe oraz wykorzystany materiał wideo. Następnie opisano testy działania aplikacji i obsługi błędnych danych wejściowych, a także wyniki analizy wybranych nagrań wykonanych w warunkach prawidłowych i utrudniających działanie systemu.
+
+\subsection{Cel i zakres testów}
+
+Celem testów było sprawdzenie działania systemu z perspektywy użytkownika oraz potwierdzenie, że poszczególne elementy aplikacji współpracują ze sobą w sposób zgodny z przyjętymi wymaganiami. Skupiono się zarówno na analizie nagrań o różnej charakterystyce, jak i na sprawdzeniu zachowania systemu w przypadku błędnych danych wejściowych.
+
+Zakres testów obejmował działanie aplikacji sieciowej oraz modułu analizy wideo. W części dotyczącej aplikacji sprawdzono możliwość przesłania pliku przez interfejs użytkownika, zapisania informacji o analizie, uruchomienia procesu przetwarzania oraz odczytania wyników po jego zakończeniu. W części dotyczącej modułu analizy skupiono się na wykrywaniu powtórzeń, działaniu reguł oceny techniki oraz sposobie reagowania systemu na nagrania odbiegające od założeń przyjętych podczas projektowania rozwiązania.
+
+Weryfikację przeprowadzono na kilku nagraniach przygotowanych na potrzeby pracy. Materiał obejmował zarówno nagrania wykonane zgodnie z założeniami systemu, jak i przypadki celowo utrudniające analizę. Zestaw testowy nie miał na celu pokrycia wszystkich możliwych błędów technicznych ani przeprowadzenia statystycznej oceny skuteczności systemu, lecz sprawdzenie najważniejszych elementów jego działania.
+
+Przy interpretacji wyników uwzględniono fakt, że system opiera się na gotowym modelu estymacji pozy człowieka. Oznacza to, że dalsze obliczenia zależą od jakości punktów kluczowych zwróconych przez model. W praktyce istotne znaczenie mają więc takie czynniki jak ustawienie kamery, widoczność sylwetki, jakość nagrania oraz stabilność detekcji w kolejnych klatkach filmu.
+
+\subsection{Środowisko testowe i materiał testowy}
+
+Testy systemu przeprowadzono lokalnie na komputerze Lenovo ThinkPad P14s. Aplikację serwerową oraz moduł analizy wideo uruchamiano z wykorzystaniem interpretera Python 3.13.5, pracując w środowisku programistycznym PyCharm. Warunki te odpowiadały środowisku wykorzystywanemu podczas implementacji systemu.
+
+Do estymacji pozy człowieka wykorzystano model MediaPipe Pose Landmarker w wariancie \texttt{pose\_landmarker\_heavy.task}. Ten sam wariant modelu był wykorzystywany podczas implementacji i przeprowadzania opisanych dalej analiz.
+
+Materiał testowy stanowiły nagrania martwego ciągu zarejestrowane telefonem iPhone 14 Pro w rozdzielczości Full HD przy 30 klatkach na sekundę. Część nagrań wykonano zgodnie z założeniami systemu, czyli przy ustawieniu kamery z boku, widocznej całej sylwetce oraz względnie stabilnym kadrze. Materiały te wykorzystano do sprawdzenia podstawowego przebiegu analizy, w tym wykrywania powtórzeń, obliczania parametrów ruchu oraz oceny techniki.
+
+Najważniejsze informacje dotyczące środowiska testowego, użytych technologii oraz parametrów materiału wideo zestawiono w tabeli~\ref{tab:srodowisko-testowe}.
+
+\begin{table}[H]
+\centering
+\caption{Środowisko testowe i parametry materiału wideo. Źródło: opracowanie własne.}
+\label{tab:srodowisko-testowe}
+\begin{tabular}{|
+>{\raggedright\arraybackslash}p{4.5cm}|
+>{\raggedright\arraybackslash}p{8cm}|}
+\hline
+\textbf{Element} & \textbf{Opis} \\ \hline
+Komputer testowy & Lenovo ThinkPad P14s \\ \hline
+Środowisko uruchomieniowe & Python 3.13.5, środowisko programistyczne PyCharm \\ \hline
+Framework aplikacji serwerowej & Django 6.0.4 \\ \hline
+Biblioteka aplikacji klienckiej & React 19.2.6 \\ \hline
+Model estymacji pozy & MediaPipe Pose Landmarker, wariant \texttt{pose\_landmarker\_heavy.task} \\ \hline
+Urządzenie rejestrujące nagrania & iPhone 14 Pro \\ \hline
+Parametry nagrań & Rozdzielczość Full HD, 30 klatek na sekundę \\ \hline
+Charakter testów & Testy funkcjonalne i jakościowa ocena wyników analizy \\ \hline
+\end{tabular}
+\end{table}
+
+Wykorzystano również nagrania przygotowane w warunkach utrudniających analizę. Obejmowały one między innymi wykonanie ruchu o ograniczonym zakresie, niekorzystne ustawienie kamery, widoczne zaokrąglenie pleców oraz ubiór utrudniający rozpoznanie wybranych punktów kluczowych sylwetki. Przypadki te nie stanowiły osobnego, rozbudowanego zbioru testowego, lecz służyły do sprawdzenia zachowania systemu w warunkach odbiegających od założeń przyjętych podczas projektowania rozwiązania.
+
+Podczas oceny wyników zwracano uwagę na poprawność wykrywania powtórzeń, stabilność detekcji punktów kluczowych oraz wartości parametrów wykorzystywanych przez reguły oceny techniki. Nagrania niespełniające założeń dotyczących perspektywy lub widoczności sylwetki wykorzystano przede wszystkim do pokazania ograniczeń przyjętej metody analizy.
+
+\subsection{Testy działania aplikacji}
+
+Pierwsza część testów dotyczyła podstawowego scenariusza działania aplikacji. Sprawdzono proces, w którym użytkownik przesyła nagranie martwego ciągu, system uruchamia analizę po stronie serwera, a po zakończeniu przetwarzania wyświetla wynik w aplikacji klienckiej. Test obejmował więc pełną ścieżkę obsługi nagrania, od wyboru pliku do prezentacji rezultatów.
+
+Po wybraniu pliku wideo w interfejsie użytkownika nagranie było przesyłane do aplikacji serwerowej. Serwer zapisywał plik oraz tworzył rekord analizy zawierający informacje potrzebne do dalszego przetwarzania. Następnie uruchamiany był moduł analizy martwego ciągu, który przetwarzał nagranie i zwracał dane obejmujące wykryte powtórzenia, podsumowania parametrów ruchu oraz ocenę techniki.
+
+Po zakończeniu analizy wynik był zapisywany po stronie serwera i udostępniany aplikacji klienckiej. W interfejsie użytkownika sprawdzono, czy widoczna jest liczba wykrytych powtórzeń, ocena poszczególnych ruchów oraz szczegółowe komunikaty dotyczące ocenianych elementów techniki. Pozwoliło to sprawdzić, czy dane wygenerowane przez moduł analizy są poprawnie przekazywane pomiędzy backendem i frontendem.
+
+Przykład widoku, w którym prezentowany jest wynik zakończonej analizy, przedstawiono wcześniej na rysunku~\ref{fig:widok-wynikow-analizy}.
+
+W testowanym scenariuszu aplikacja wykonała pełny proces analizy nagrania bez konieczności ręcznej ingerencji w dane pośrednie. Użytkownik przekazywał jedynie plik wideo, a pozostałe etapy były realizowane po stronie systemu. Otrzymany wynik był dostępny w aplikacji klienckiej w formie przewidzianej w projekcie interfejsu.
+
+\subsection{Testy obsługi błędnych danych wejściowych}
+
+Oprócz podstawowej ścieżki działania sprawdzono zachowanie aplikacji w sytuacji, gdy użytkownik wybiera plik, który nie jest rozpoznawany jako materiał wideo. Taki przypadek jest istotny, ponieważ moduł analizy jest przeznaczony do przetwarzania nagrań wideo, a nieprawidłowy plik nie powinien prowadzić do uruchomienia analizy.
+
+Test polegał na wybraniu w aplikacji klienckiej pliku niebędącego materiałem wideo. W takiej sytuacji plik nie został przekazany do dalszego przetwarzania, a interfejs wyświetlił komunikat: \texttt{Błąd: Wybrany plik nie jest plikiem video.} Informacja o problemie pojawiła się więc jeszcze przed wysłaniem żądania do aplikacji serwerowej.
+
+Test obejmował jeden podstawowy przypadek nieprawidłowych danych wejściowych. Jego celem było sprawdzenie reakcji interfejsu na próbę przekazania pliku niezgodnego z przeznaczeniem formularza, a nie pełna weryfikacja wszystkich możliwych błędów danych wejściowych.
+
+Ta wersja zachowuje sens obecnego fragmentu, ale nie sugeruje testowania formatów, których faktycznie nie
+
+\subsection{Wyniki analizy przykładowego nagrania}
+
+Do dokładniejszej analizy wybrano nagranie przedstawiające serię ośmiu powtórzeń martwego ciągu. Plik miał rozmiar około 33 MB, a czas trwania nagrania wynosił 32 sekundy. Materiał został wykonany z boku osoby ćwiczącej, przy stabilnym ustawieniu kamery oraz widocznej całej sylwetce. Ubiór nie utrudniał znacząco analizy, ponieważ kolana i ułożenie tułowia pozostawały widoczne w kolejnych fazach ruchu. W tle nagrania znajdowało się lustro oraz inne osoby ćwiczące, jednak w tym przypadku nie zakłóciło to detekcji sylwetki osoby wykonującej martwy ciąg.
+
+Przed uruchomieniem analizy nagranie oceniono wizualnie. Sześć z ośmiu powtórzeń uznano za poprawne, przy czym różniły się one głównie głębokością pozycji startowej. Piąte powtórzenie wykonano w ograniczonym zakresie ruchu, natomiast w szóstym widoczne było zaokrąglenie pleców mimo zachowania pełnego zakresu ruchu. Ocena wizualna miała charakter pomocniczy i służyła do jakościowego porównania działania systemu. Nie stanowiła eksperckiej wartości referencyjnej.
+
+Zestawienie oceny wizualnej z wynikiem zwróconym przez system przedstawiono w tabeli~\ref{tab:porownanie-oceny-powtorzen}.
+
+\begin{table}[H]
+\centering
+\caption{Porównanie oceny wizualnej z wynikiem systemu dla przykładowego nagrania. Źródło: opracowanie własne.}
+\label{tab:porownanie-oceny-powtorzen}
+\footnotesize
+\renewcommand{\arraystretch}{1.08}
+\setlength{\tabcolsep}{2.5pt}
+\begin{tabular}{|
+>{\centering\arraybackslash}p{1.05cm}|
+>{\raggedright\arraybackslash}p{4.25cm}|
+>{\raggedright\arraybackslash}p{3.95cm}|
+>{\centering\arraybackslash}p{1.65cm}|
+>{\raggedright\arraybackslash}p{3.85cm}|}
+\hline
+\textbf{Powt.} & \textbf{Ocena wizualna} & \textbf{Wynik systemu} & \textbf{Zgodność} & \textbf{Komentarz} \\ \hline
+1 & Poprawne, pełny zakres ruchu, dobry wyprost bez widocznego przeprostu, wyższa pozycja startowa & Poprawne, wyższa pozycja startowa & Tak & System poprawnie rozpoznał charakter pozycji startowej i nie wskazał błędów techniki. \\ \hline
+2 & Poprawne, pełny zakres ruchu, dobry wyprost bez widocznego przeprostu, wyższa pozycja startowa & Poprawne, wyższa pozycja startowa & Tak & Wynik systemu odpowiadał ocenie wizualnej. \\ \hline
+3 & Poprawne, pełny zakres ruchu, jednostajny przebieg ruchu, pozycja startowa średnia & Poprawne, pozycja startowa zbliżona do mediany serii & Tak & System wskazał pozycję startową zgodną z obserwacją nagrania. \\ \hline
+4 & Poprawne, pełny zakres ruchu, dobry wyprost bez widocznego przeprostu, głębsza pozycja startowa & Poprawne, głębsza pozycja startowa & Tak & System poprawnie odróżnił głębszą pozycję startową od wcześniejszych powtórzeń. \\ \hline
+5 & Niepoprawne, zbyt krótki zakres ruchu, brak pełnego wyprostu w pozycji końcowej & Niepoprawne, obniżony zakres ruchu oraz niepełny wyprost biodra i kolana & Tak & System wykrył główny błąd widoczny w nagraniu. \\ \hline
+6 & Wymaga uwagi, pełny zakres ruchu, widoczne zaokrąglenie pleców & Wymaga uwagi, bark niżej niż biodro w pozycji startowej & Częściowo & System wskazał niekorzystną relację barku i biodra, ale nie ocenia bezpośrednio krzywizny kręgosłupa. \\ \hline
+7 & Poprawne, pełny zakres ruchu, dobry wyprost bez widocznego przeprostu, głębsza pozycja startowa & Poprawne, głębsza pozycja startowa & Tak & Wynik był zgodny z oceną wizualną. \\ \hline
+8 & Poprawne, pełny zakres ruchu, jednostajny przebieg ruchu, pozycja startowa średnia & Poprawne, pozycja startowa zbliżona do mediany serii & Tak & System poprawnie ocenił powtórzenie i jego pozycję startową. \\ \hline
+\end{tabular}
+\end{table}
+
+Przykładową klatkę z analizowanego nagrania, wraz z naniesionymi punktami kluczowymi sylwetki oraz połączeniami wykorzystywanymi podczas analizy, przedstawiono na rysunku~\ref{fig:klatka-analizy-przykladowe-nagranie}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.55\textwidth]{figures/obraz_punkty_kluczowe.png}
+\caption{Przykładowa klatka z analizowanego nagrania z naniesionymi punktami kluczowymi sylwetki wykrytymi przez model estymacji pozy. Źródło: opracowanie własne.}
+\label{fig:klatka-analizy-przykladowe-nagranie}
+\end{figure}
+
+System wykrył w nagraniu osiem powtórzeń, co odpowiadało rzeczywistej liczbie ruchów w serii. Sześć powtórzeń ocenionych wizualnie jako poprawne otrzymało również poprawną klasyfikację systemu. Dla tych ruchów zakres ruchu sztangi był zbliżony do mediany serii, a wartości kątów biodra i kolana w pozycji końcowej spełniały przyjęte kryteria. System rozróżnił również różnice w pozycji startowej poszczególnych powtórzeń.
+
+Piąte powtórzenie zostało sklasyfikowane jako niepoprawne, co było zgodne z oceną wizualną. System wskazał trzy przyczyny: niepełny wyprost biodra, niepełny wyprost kolana oraz obniżony zakres ruchu sztangi. Wartość zakresu ruchu sztangi wyniosła 0{,}110, podczas gdy mediana serii wynosiła 0{,}161. W górnej pozycji kąt biodra wyniósł 80{,}6°, a kąt kolana 120{,}9°. Wartości te znajdowały się wyraźnie poniżej progów wykorzystywanych przez reguły oceny i odpowiadały niepełnemu zakończeniu ruchu widocznemu na nagraniu.
+
+Szóste powtórzenie jest istotne z punktu widzenia ograniczeń przyjętej metody. W ocenie wizualnej widoczne było zaokrąglenie pleców, mimo że zakres ruchu był pełny. System nie sklasyfikował tego ruchu jako niepoprawnego, ponieważ zakres ruchu oraz wyprost biodra i kolana spełniały trzy główne kryteria klasyfikacji powtórzenia. Jednocześnie ruch został oznaczony w interfejsie jako wymagający uwagi. W szczegółowym komunikacie wskazano, że w pozycji startowej bark znajdował się niżej niż biodro.
+
+System nie analizuje bezpośrednio krzywizny kręgosłupa. Relacja barku względem biodra jest regułą pomocniczą, która może wskazywać na niekorzystne ustawienie tułowia lub podejrzenie zaokrąglenia pleców. W tym przypadku ostrzeżenie było zgodne z problemem zauważonym podczas oceny wizualnej, jednak jego przyczyna została określona pośrednio.
+
+Przykładową klatkę z szóstego powtórzenia, w którym system wskazał problem z relacją barku i biodra w pozycji startowej, przedstawiono na rysunku~\ref{fig:klatka-powtorzenie-szoste}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.55\textwidth]{figures/obraz_koci_grzebiet.png}
+\caption{Klatka z szóstego powtórzenia, w którym system wskazał niekorzystne ustawienie tułowia w pozycji startowej. Źródło: opracowanie własne.}
+\label{fig:klatka-powtorzenie-szoste}
+\end{figure}
+
+Na rysunku widoczne jest obniżenie barków względem bioder oraz zaokrąglenie pleców, określane potocznie jako \enquote{koci grzbiet}. System nie wykrywa tego zjawiska bezpośrednio. W przedstawionym przypadku ostrzeżenie zostało wygenerowane na podstawie położenia barku względem biodra w pozycji startowej.
+
+Oprócz oceny pojedynczych powtórzeń system przygotował również ocenę spójności serii. Ogólny status został oznaczony jako ostrzeżenie. Różnica zakresu ruchu sztangi pomiędzy powtórzeniami uwzględnionymi w tej ocenie wyniosła 0{,}022 i mieściła się w przyjętym progu. Różnica czasu trwania wyniosła 2{,}53 s. Wartość ta została przez system przedstawiona informacyjnie i nie wpływała bezpośrednio na ogólny status ostrzegawczy. Różnica kąta kolana w pozycji końcowej wyniosła natomiast 12{,}0°, przekraczając przyjęty próg 10°. To właśnie ten parametr spowodował oznaczenie oceny spójności jako wymagającej uwagi.
+
+Wyniki tego nagrania pokazują, że przy materiale spełniającym główne założenia system poprawnie wykrył liczbę powtórzeń oraz rozpoznał ruch o ograniczonym zakresie. Wyniki dotyczące pozycji startowej były również zgodne z oceną wizualną. Przypadek szóstego powtórzenia pokazuje jednak, że informacje dotyczące ustawienia pleców mają charakter pośredni i powinny być interpretowane jako ostrzeżenie, a nie bezpośrednia ocena krzywizny kręgosłupa.
+
+\subsection{Analiza nagrania wykonanego pod niekorzystnym kątem}
+
+Pierwszy przypadek problematyczny dotyczył nagrania wykonanego pod kątem względem osoby ćwiczącej. Materiał przedstawiał sześć powtórzeń martwego ciągu. Cztery pierwsze ruchy oceniono wizualnie jako poprawne, natomiast w dwóch ostatnich widoczne było zaokrąglenie pleców. Sylwetka była widoczna w całości, jednak nagranie nie spełniało w pełni założenia widoku bocznego. Kamera była ustawiona skośnie i nieznacznie zmieniała swoje położenie. W tle widoczne były także lustra oraz inne osoby ćwiczące.
+
+System wykrył pięć powtórzeń. Różnica względem rzeczywistej liczby ruchów dotyczyła początku nagrania. Pierwsze powtórzenie rozpoczęło się bezpośrednio po uruchomieniu nagrywania i nie zostało uwzględnione w końcowym podsumowaniu. Algorytm wykrywania powtórzeń opiera się na sekwencji dolnej pozycji sztangi, pozycji górnej oraz kolejnej pozycji dolnej. W tym przypadku początkowa dolna pozycja nie została wyznaczona jako lokalne ekstremum, ponieważ nagranie nie zawierało wystarczającego fragmentu poprzedzającego rozpoczęcie ruchu. Pokazuje to, że nagranie powinno rozpoczynać się chwilę przed wykonaniem pierwszego powtórzenia.
+
+Porównanie oceny wizualnej z wynikiem systemu dla tego nagrania przedstawiono w tabeli~\ref{tab:porownanie-nagranie-pod-katem}.
+
+\begin{table}[H]
+\centering
+\caption{Porównanie oceny wizualnej z wynikiem systemu dla nagrania wykonanego pod kątem. Źródło: opracowanie własne.}
+\label{tab:porownanie-nagranie-pod-katem}
+\footnotesize
+\renewcommand{\arraystretch}{1.08}
+\setlength{\tabcolsep}{2.5pt}
+\begin{tabular}{|
+>{\centering\arraybackslash}p{1.0cm}|
+>{\raggedright\arraybackslash}p{3.7cm}|
+>{\raggedright\arraybackslash}p{3.8cm}|
+>{\centering\arraybackslash}p{1.6cm}|
+>{\raggedright\arraybackslash}p{4.0cm}|}
+\hline
+\textbf{Powt.} & \textbf{Ocena wizualna} & \textbf{Wynik systemu} & \textbf{Zgodność} & \textbf{Komentarz} \\ \hline
+1 & Poprawne, pełny ruch & Niewykryte w podsumowaniu & Nie & Początkowa dolna pozycja ruchu nie została wykryta, ponieważ nagranie rozpoczęło się bezpośrednio przed podnoszeniem. \\ \hline
+2 & Poprawne, pełny zakres ruchu, prawidłowy wyprost & Poprawne, pozycja startowa zbliżona do mediany serii & Tak & System poprawnie ocenił zakres ruchu oraz pozycję końcową. \\ \hline
+3 & Poprawne, pełny zakres ruchu, prawidłowy wyprost & Poprawne, pozycja startowa zbliżona do mediany serii & Tak & Wynik systemu odpowiadał ocenie wizualnej. \\ \hline
+4 & Poprawne, pełny zakres ruchu, prawidłowy wyprost & Częściowe, niepełny wyprost kolana & Częściowo & System wskazał problem, który nie był jednoznacznie widoczny podczas oceny wizualnej. \\ \hline
+5 & Wymaga uwagi, widoczne zaokrąglenie pleców & Poprawne, wyższa pozycja startowa & Nie & Reguła dotycząca relacji barku i biodra nie wygenerowała ostrzeżenia mimo problemu widocznego podczas oceny wizualnej. \\ \hline
+6 & Wymaga uwagi, widoczne zaokrąglenie pleców & Poprawne, pozycja startowa zbliżona do mediany serii & Nie & System poprawnie ocenił zakres ruchu, ale reguła dotycząca ustawienia tułowia nie wygenerowała ostrzeżenia. \\ \hline
+\end{tabular}
+\end{table}
+
+Dla wykrytych powtórzeń zakres ruchu sztangi został oceniony jako prawidłowy. Wartości tego parametru były zbliżone do mediany serii, a ocena jego spójności nie wskazała problemu. Również wyprost w górnej pozycji został w większości przypadków oceniony poprawnie. Oznacza to, że mimo skośnego ustawienia kamery podstawowe parametry związane z zakresem ruchu pozostały możliwe do wyznaczenia.
+
+Większe różnice pojawiły się przy interpretacji kątów i ustawienia tułowia. Czwarte rzeczywiste powtórzenie, będące trzecim powtórzeniem wykrytym przez system, zostało oznaczone jako częściowe ze względu na niepełny wyprost kolana. W ocenie wizualnej ruch ten nie wyróżniał się jednak wyraźnym problemem z wyprostem. Jedną z możliwych przyczyn tej rozbieżności jest skośna perspektywa nagrania. Przy takim ustawieniu kamery położenie kolana, biodra i innych punktów sylwetki jest odwzorowywane inaczej niż w ujęciu bocznym, dla którego projektowano sposób analizy.
+
+Najważniejsza rozbieżność dotyczyła dwóch ostatnich powtórzeń. Podczas oceny wizualnej widoczne było w nich zaokrąglenie pleców. System nie oznaczył jednak tych ruchów jako wymagających uwagi w zakresie ustawienia tułowia. Reguła oparta na relacji barku i biodra w pozycji startowej została w obu przypadkach oceniona jako poprawna. Pokazuje to, że zastosowany wskaźnik nie zawsze odzwierciedla problem z ustawieniem pleców widoczny dla obserwatora, szczególnie przy nagraniu wykonanym pod kątem.
+
+Klatkę z jednego z końcowych powtórzeń, w którym podczas oceny wizualnej zauważono zaokrąglenie pleców, przedstawiono na rysunku~\ref{fig:nagranie-pod-katem-plecy}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.55\textwidth]{figures/obraz_boczna.png}
+\caption{Klatka z nagrania wykonanego pod niekorzystnym kątem, przedstawiająca powtórzenie z widocznym problemem ustawienia pleców. Źródło: opracowanie własne.}
+\label{fig:nagranie-pod-katem-plecy}
+\end{figure}
+
+Przedstawiony przypadek pokazuje ograniczenie wynikające z analizy obrazu dwuwymiarowego. Przy skośnym ustawieniu kamery relacje pomiędzy punktami kluczowymi mogą różnić się od tych obserwowanych w ujęciu bocznym. Zakres ruchu sztangi może nadal zostać oceniony poprawnie, natomiast wyniki zależne od kątów stawów oraz wzajemnego położenia punktów sylwetki wymagają w takich warunkach większej ostrożności.
+
+Analiza tego nagrania potwierdziła znaczenie założeń dotyczących przygotowania materiału wejściowego. Kamera powinna być ustawiona z boku osoby ćwiczącej, a nagranie powinno rozpocząć się chwilę przed pierwszym powtórzeniem. Pozwala to zarówno ograniczyć wpływ perspektywy na obliczane parametry, jak i zapewnić algorytmowi fragment nagrania potrzebny do poprawnego wykrycia początku pierwszego ruchu.
+
+\subsection{Nagranie z ubiorem utrudniającym detekcję kolan}
+
+Kolejny przypadek problematyczny dotyczył nagrania, w którym osoba ćwicząca miała na sobie szerokie, jednolite, czarne spodnie. Materiał przedstawiał pięć poprawnie wykonanych powtórzeń martwego ciągu. Kamera była ustawiona w sposób umożliwiający obserwację całej sylwetki, a ruch został wykonany w pełnym zakresie. Podczas oceny wizualnej nie stwierdzono istotnych błędów techniki w żadnym z powtórzeń.
+
+W nagraniu zaobserwowano mniej stabilną detekcję punktów kluczowych odpowiadających kolanom, szczególnie w fazie opuszczania ciężaru. Szerokie spodnie mogły utrudniać jednoznaczne określenie położenia tych punktów. Przykład błędnej lokalizacji punktu kolanowego w pojedynczej klatce nagrania przedstawiono na rysunku~\ref{fig:bledna-detekcja-kolana}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.55\textwidth]{figures/obraz_spodnie.png}
+\caption{Przykład błędnej detekcji punktu kolanowego w nagraniu z ubiorem utrudniającym rozpoznanie położenia stawu. Źródło: opracowanie własne.}
+\label{fig:bledna-detekcja-kolana}
+\end{figure}
+
+Na przedstawionej klatce punkt kluczowy odpowiadający kolanu został wykryty z wyraźnym przesunięciem względem jego rzeczywistego położenia, co może wpływać na wartości kąta kolana obliczane w dalszej analizie.
+
+System wykrył w nagraniu pięć powtórzeń, co odpowiadało rzeczywistej liczbie ruchów. Wszystkie powtórzenia zostały oznaczone jako poprawne.
+
+Porównanie oceny wizualnej z wynikiem zwróconym przez system przedstawiono w tabeli~\ref{tab:porownanie-ubior-kolana}.
+
+\begin{table}[H]
+\centering
+\caption{Porównanie oceny wizualnej z wynikiem systemu dla nagrania z ubiorem utrudniającym detekcję kolan. Źródło: opracowanie własne.}
+\label{tab:porownanie-ubior-kolana}
+\footnotesize
+\renewcommand{\arraystretch}{1.08}
+\setlength{\tabcolsep}{2.5pt}
+\begin{tabular}{|
+>{\centering\arraybackslash}p{1.05cm}|
+>{\raggedright\arraybackslash}p{4.15cm}|
+>{\raggedright\arraybackslash}p{4.05cm}|
+>{\centering\arraybackslash}p{1.55cm}|
+>{\raggedright\arraybackslash}p{3.85cm}|}
+\hline
+\textbf{Powt.} & \textbf{Ocena wizualna} & \textbf{Wynik systemu} & \textbf{Zgodność} & \textbf{Komentarz} \\ \hline
+1 & Poprawne, pełny zakres ruchu, prawidłowy wyprost & Poprawne, pozycja startowa zbliżona do mediany serii & Tak & System poprawnie ocenił ruch i nie wskazał błędów techniki. \\ \hline
+2 & Poprawne, pełny zakres ruchu, prawidłowy wyprost & Poprawne, pozycja startowa zbliżona do mediany serii & Tak & Wynik systemu odpowiadał ocenie wizualnej. \\ \hline
+3 & Poprawne, pełny zakres ruchu, prawidłowy wyprost & Poprawne, pozycja startowa zbliżona do mediany serii & Tak & System poprawnie wykrył powtórzenie mimo trudniejszej widoczności kolan. \\ \hline
+4 & Poprawne, pełny zakres ruchu, prawidłowy wyprost & Poprawne, pozycja startowa zbliżona do mediany serii & Tak & Ogólna klasyfikacja powtórzenia była zgodna z oceną wizualną. \\ \hline
+5 & Poprawne, pełny zakres ruchu, prawidłowy wyprost & Poprawne, wyższa pozycja startowa & Częściowo & System poprawnie sklasyfikował powtórzenie, ale odmiennie określił pozycję startową, co mogło wynikać z mniej stabilnej detekcji kolana. \\ \hline
+\end{tabular}
+\end{table}
+
+Wpływ mniej stabilnej detekcji był widoczny w danych szczegółowych. Największe różnice pojawiły się w parametrach zależnych od położenia kolana. W piątym powtórzeniu system opisał pozycję startową jako wyższą, wskazując kąt kolana równy 133{,}7°. Pozostałe powtórzenia zostały opisane jako rozpoczynające się z pozycji zbliżonej do mediany serii. Odmienny wynik piątego powtórzenia może wynikać zarówno z rzeczywistej różnicy w pozycji startowej, jak i z mniej stabilnego wykrycia punktu kolanowego.
+
+Podobny efekt był widoczny w ocenie spójności serii. Ogólny status został oznaczony jako ostrzeżenie. Zakres ruchu sztangi oraz kąt biodra w pozycji końcowej nie wykazały nadmiernej zmienności, natomiast różnica kąta kolana w pozycji końcowej wyniosła 12{,}9°. Wartość ta przekroczyła przyjęty w systemie próg 10°, co spowodowało wygenerowanie ostrzeżenia. Pojedyncze błędne detekcje nie doprowadziły więc do niepoprawnej klasyfikacji całych powtórzeń, ale mogły wpłynąć na parametry szczegółowe oraz ocenę spójności serii.
+
+Analiza tego przypadku pokazuje, że system może poprawnie rozpoznać liczbę powtórzeń i ogólny przebieg ruchu również wtedy, gdy wybrane punkty kluczowe są w części klatek wykrywane mniej stabilnie. Wyniki parametrów zależnych od położenia kolana należy jednak w takich warunkach interpretować ostrożnie. Przypadek ten pokazuje również, że pojedyncze błędy detekcji mogą nie zmieniać ogólnej klasyfikacji powtórzenia, ale nadal wpływać na bardziej szczegółowe wyniki analizy.
+
+\subsection{Podsumowanie wyników testów}
+
+Przeprowadzone testy wskazują, że zaimplementowany system realizuje podstawowy scenariusz działania przyjęty w pracy. Aplikacja umożliwia przesłanie nagrania wideo, przeprowadzenie analizy po stronie serwera, zapisanie wyniku oraz jego prezentację w aplikacji klienckiej. Sprawdzono również podstawową reakcję interfejsu na próbę wybrania pliku niebędącego materiałem wideo.
+
+Najlepsze wyniki uzyskano dla nagrania przygotowanego zgodnie z założeniami systemu, czyli przy ustawieniu kamery z boku, pełnej widoczności sylwetki oraz ubiorze nieutrudniającym detekcji punktów kluczowych. System poprawnie wykrył liczbę powtórzeń oraz rozpoznał ruch wykonany w ograniczonym zakresie. W przypadku powtórzenia z widocznym zaokrągleniem pleców wygenerowane zostało ostrzeżenie dotyczące relacji barku i biodra. Należy jednak pamiętać, że reguła ta nie stanowi bezpośredniej oceny krzywizny kręgosłupa.
+
+Przypadki problematyczne pokazały znaczenie sposobu przygotowania materiału wejściowego. Rozpoczęcie nagrania bezpośrednio przed pierwszym ruchem spowodowało brak pełnej sekwencji potrzebnej do wykrycia pierwszego powtórzenia. Skośne ustawienie kamery utrudniało natomiast interpretację parametrów zależnych od położenia punktów kluczowych i kątów stawów. W nagraniu z szerokimi spodniami zaobserwowano z kolei mniej stabilną detekcję punktów odpowiadających kolanom, co mogło wpływać na szczegółowe wartości kątów oraz ocenę spójności serii.
+
+Uzyskane wyniki pokazują, że system może służyć do jakościowej oceny wybranych elementów techniki martwego ciągu, szczególnie w przypadku nagrań przygotowanych zgodnie z przyjętymi wymaganiami. Wyniki należy jednak interpretować z uwzględnieniem ograniczeń estymacji pozy z obrazu dwuwymiarowego oraz zastosowanych reguł oceny. System nie zastępuje oceny trenera ani profesjonalnej analizy biomechanicznej, lecz może pełnić funkcję narzędzia wspierającego wstępną analizę wykonania ćwiczenia.

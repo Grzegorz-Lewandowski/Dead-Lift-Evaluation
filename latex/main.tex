@@ -32,7 +32,7 @@
 \renewcommand{\tablename}{Tab.}
 \renewcommand{\listfigurename}{Wykaz rysunków}
 \renewcommand{\listtablename}{Wykaz tabel}
-
+\usepackage{pdfpages}
 \usepackage{titlesec}
 
 \titleformat{\section}
@@ -91,19 +91,22 @@
 \input{chapters/03_podstawy_teoretyczne}
 
 \newpage
-\input{chapters/04_analiza_wymagan}
+\input{chapters/04_metoda_analizy}
 
 \newpage
-\input{chapters/05_projekt_systemu}
+\input{chapters/05_analiza_wymagan}
 
 \newpage
-\input{chapters/06_implementacja}
+\input{chapters/06_projekt_systemu}
 
 \newpage
-\input{chapters/07_testy_i_wyniki}
+\input{chapters/07_implementacja}
 
 \newpage
-\input{chapters/08_podsumowanie}
+\input{chapters/08_testy_i_wyniki}
+
+\newpage
+\input{chapters/09_podsumowanie}
 
 \newpage
 \addcontentsline{toc}{section}{Bibliografia}
@@ -119,6 +122,6 @@
 \listoftables
 
 \newpage
-\input{chapters/09_streszczenie}
+\input{chapters/10_streszczenie}
 
 \end{document}

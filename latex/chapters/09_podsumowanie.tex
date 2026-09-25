@@ -1,0 +1,40 @@
+\clearpage
+\section*{Podsumowanie}
+\addcontentsline{toc}{section}{Podsumowanie}  
+
+\subsection*{Realizacja celu pracy}
+\addcontentsline{toc}{subsection}{Realizacja celu pracy}
+
+Celem pracy było zaprojektowanie i zaimplementowanie aplikacji sieciowej umożliwiającej analizę biomechaniki martwego ciągu na podstawie nagrania wideo. W ramach pracy przygotowano system składający się z aplikacji klienckiej, aplikacji serwerowej oraz modułu analizy wideo. Poszczególne części zostały połączone w jeden przepływ działania, w którym użytkownik przesyła nagranie, serwer uruchamia analizę, a otrzymany wynik zostaje przedstawiony w interfejsie aplikacji.
+
+Zrealizowany system wykorzystuje gotowy model estymacji pozy człowieka do wykrywania punktów kluczowych sylwetki. Na ich podstawie moduł analityczny wyznacza wybrane parametry ruchu, wykrywa powtórzenia oraz przygotowuje ocenę wybranych elementów techniki według zaimplementowanych reguł. Aplikacja serwerowa odpowiada za przyjęcie i zapis nagrania, uruchomienie analizy oraz przechowanie jej wyniku, natomiast aplikacja kliencka umożliwia przesłanie materiału i przedstawia użytkownikowi uzyskaną ocenę.
+
+Zakres pracy został zrealizowany zgodnie z jej aplikacyjnym charakterem. Głównym rezultatem nie jest nowy model uczenia maszynowego, lecz działający system informatyczny integrujący gotowy model detekcji punktów kluczowych z własnym modułem przetwarzania nagrania, regułami oceny techniki oraz interfejsem użytkownika. Przygotowane rozwiązanie umożliwia wykrywanie powtórzeń, obliczanie wybranych parametrów biomechanicznych oraz wskazywanie elementów wykonania ruchu, które mogą wymagać uwagi.
+
+Przeprowadzone testy wskazują, że system realizuje główny scenariusz użycia przyjęty w pracy. W przypadku nagrania przygotowanego zgodnie z wymaganiami aplikacja poprawnie wykryła liczbę powtórzeń oraz zwróciła wyniki w dużej części zgodne z pomocniczą oceną wizualną. Jednocześnie testy przypadków odbiegających od przyjętych warunków pozwoliły wskazać ograniczenia zastosowanej metody, które omówiono w dalszej części podsumowania.
+
+\subsection*{Wnioski z implementacji i testów}
+\addcontentsline{toc}{subsection}{Wnioski z implementacji i testów}
+
+Przyjęty podział systemu na aplikację kliencką, aplikację serwerową oraz moduł analizy wideo pozwolił rozdzielić odpowiedzialność poszczególnych części rozwiązania. Logika związana z przetwarzaniem nagrania i oceną ruchu została oddzielona od obsługi żądań oraz interfejsu użytkownika. Ułatwiło to rozwijanie modułu analitycznego bez konieczności wprowadzania zmian w pozostałych częściach aplikacji.
+
+Istotnym wnioskiem z implementacji jest również rozdzielenie działania modelu estymacji pozy od właściwej oceny techniki. Wykorzystany model MediaPipe dostarcza współrzędne punktów kluczowych sylwetki, natomiast ich dalsza interpretacja odbywa się za pomocą opracowanych algorytmów i reguł. Pozwoliło to skupić się na analizie ruchu bez konieczności trenowania własnego modelu uczenia maszynowego. Jednocześnie oznacza to, że jakość wyznaczanych parametrów zależy od poprawności punktów zwracanych przez model.
+
+Przeprowadzone testy pokazały, że reguły oparte na zakresie ruchu oraz wyproście biodra i kolana mogą poprawnie wskazywać wybrane nieprawidłowości, gdy nagranie spełnia przyjęte wymagania. Większej ostrożności wymaga natomiast interpretacja parametrów opisujących ustawienie tułowia. Zastosowana relacja barku i biodra może sygnalizować problem, ale nie stanowi bezpośredniej oceny krzywizny kręgosłupa. Wyniki testów pokazały także, że skośne ustawienie kamery oraz mniej stabilna detekcja wybranych punktów mogą wpływać na obliczane kąty i szczegółową ocenę ruchu.
+
+Na działanie systemu wpływa również sposób przygotowania nagrania. Materiał powinien przedstawiać całą sylwetkę z perspektywy bocznej oraz zawierać krótki fragment przed rozpoczęciem pierwszego powtórzenia. Przeprowadzone testy miały charakter funkcjonalny i jakościowy, dlatego nie stanowią statystycznej walidacji dokładności zastosowanej metody. Wskazują jednak, że przyjęte rozwiązanie pozwala wykorzystać detekcję punktów kluczowych do analizy wybranych elementów techniki martwego ciągu, jednocześnie pokazując ograniczenia, które należy uwzględniać podczas interpretacji wyników.
+
+\subsection*{Ograniczenia rozwiązania i możliwości rozwoju}
+\addcontentsline{toc}{subsection}{Ograniczenia rozwiązania i możliwości rozwoju}
+
+Najważniejsze ograniczenie przygotowanego rozwiązania wynika z zastosowania analizy obrazu dwuwymiarowego oraz gotowego modelu estymacji pozy człowieka. System wyznacza parametry ruchu na podstawie punktów kluczowych wykrytych w pojedynczym nagraniu, dlatego wyniki zależą od ustawienia kamery, widoczności sylwetki oraz poprawności detekcji tych punktów. Skośna perspektywa lub mniej stabilne wykrycie wybranych stawów mogą wpływać na obliczane kąty i relacje pomiędzy punktami. System nie odtwarza przy tym pełnej informacji przestrzennej o ruchu.
+
+Drugim ograniczeniem jest zakres ocenianych elementów techniki. Ocena została oparta na jawnie zdefiniowanych regułach wykorzystujących między innymi zakres ruchu sztangi, wyprost biodra i kolana, pozycję startową oraz relację barku i biodra. Rozwiązanie nie stanowi pełnej analizy biomechanicznej i nie ocenia bezpośrednio rzeczywistej krzywizny kręgosłupa, sił działających na ciało ani momentów występujących w stawach. Wynik powinien być więc traktowany jako informacja pomocnicza, a nie jako zastępstwo profesjonalnej oceny techniki.
+
+Ograniczeniem jest również sposób weryfikacji rozwiązania. Testy przeprowadzono na wybranych nagraniach przygotowanych na potrzeby pracy, co pozwoliło sprawdzić działanie aplikacji i zachowanie systemu w kilku istotnych przypadkach. Nie stanowią one jednak statystycznej walidacji dokładności metody. Dokładniejsza ocena wymagałaby większego zbioru nagrań obejmującego różne osoby, warunki nagrywania i rodzaje błędów technicznych oraz porównania wyników systemu z oceną specjalisty.
+
+Dalszy rozwój rozwiązania powinien obejmować przede wszystkim rozszerzenie takiej walidacji i na jej podstawie dokładniejsze dostosowanie progów wykorzystywanych przez reguły oceny. Możliwe byłoby również zwiększenie odporności analizy na pojedyncze błędne detekcje, na przykład przez dokładniejsze wykorzystanie informacji o widoczności punktów kluczowych, odrzucanie niewiarygodnych danych lub dodatkową stabilizację ich przebiegów w czasie. Pozwoliłoby to ograniczyć wpływ pojedynczych niepoprawnie wykrytych punktów na obliczane parametry.
+
+System można rozwijać również od strony aplikacyjnej. Przydatnym rozszerzeniem byłaby weryfikacja sposobu przygotowania nagrania jeszcze przed rozpoczęciem analizy, tak aby użytkownik otrzymywał informację o nieprawidłowym kadrze lub widoczności sylwetki. W przypadku obsługi dłuższych materiałów lub większej liczby analiz możliwe byłoby również przeniesienie przetwarzania do zadania wykonywanego asynchronicznie. Dalszy rozwój może obejmować także analizę innych ćwiczeń siłowych lub zastosowanie metod wykorzystujących więcej niż jedno ujęcie, jeżeli wymagany byłby szerszy opis ruchu w przestrzeni.
+
+Przygotowane rozwiązanie stanowi więc punkt wyjścia do dalszego rozwijania systemu analizy ruchu, przy czym najważniejszym kierunkiem pozostaje zwiększenie zakresu walidacji oraz odporności na warunki odbiegające od założeń przyjętych w pracy.
