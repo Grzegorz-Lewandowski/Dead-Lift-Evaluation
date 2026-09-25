@@ -10,7 +10,7 @@ Po przeanalizowaniu poszczególnych powtórzeń ich parametry są dodatkowo por�
 
 \subsection{Wygładzanie przebiegu ruchu}
 
-Przed wykrywaniem powtórzeń wygładzany jest przebieg pionowego położenia sztangi. W tym celu zastosowano średnią kroczącą z oknem pięciu próbek:
+Przed wykrywaniem powtórzeń wygładzany jest przebieg pionowego położenia sztangi. W tym celu zastosowano średnią kroczącą z oknem pięciu próbek. Dla próbek, dla których dostępne jest pełne okno, można ją zapisać jako:
 
 \begin{equation}
 \hat{y}_i =
@@ -18,7 +18,7 @@ Przed wykrywaniem powtórzeń wygładzany jest przebieg pionowego położenia sz
 \sum_{k=-2}^{2} y_{i+k},
 \end{equation}
 
-gdzie \(y_i\) oznacza położenie pionowe sztangi dla kolejnej analizowanej klatki, a \(\hat{y}_i\) wartość po wygładzeniu.
+gdzie \(y_i\) oznacza pionowe położenie sztangi dla kolejnej analizowanej klatki, a \(\hat{y}_i\) wartość po wygładzeniu. Na początku i końcu przebiegu, gdzie pełne okno nie jest dostępne, średnia wyznaczana jest na podstawie dostępnych próbek.
 
 Wygładzony przebieg jest następnie wykorzystywany podczas wykrywania powtórzeń, co ogranicza wpływ chwilowych zmian położenia wyznaczanego na podstawie kolejnych klatek.
 
@@ -26,7 +26,7 @@ Wygładzony przebieg jest następnie wykorzystywany podczas wykrywania powtórze
 
 Wykrywanie powtórzeń opiera się na zmianach wygładzonego pionowego położenia sztangi. W przyjętym układzie współrzędnych większa wartość położenia oznacza niższe położenie sztangi. Na tej podstawie lokalne maksima przebiegu odpowiadają dolnym pozycjom ruchu, natomiast lokalne minima jego górnym pozycjom.
 
-Za pojedyncze powtórzenie uznawana jest sekwencja dolna pozycja--górna pozycja--dolna pozycja. Początek fazy podnoszenia wyznaczany jest po zmianie położenia sztangi o co najmniej \(0{,}03\) względem wykrytej pozycji dolnej. Fragment bezpośrednio poprzedzający podnoszenie może zostać zakwalifikowany jako faza przygotowania, przy czym analizowany jest maksymalnie okres jednej sekundy przed rozpoczęciem podnoszenia.
+Za pojedyncze powtórzenie uznawana jest sekwencja dolna pozycja--górna pozycja--dolna pozycja, spełniająca przyjęte warunki dotyczące zakresu i czasu trwania ruchu. Początek fazy podnoszenia wyznaczany jest po odpowiedniej zmianie położenia sztangi względem wykrytej pozycji dolnej. Fragment bezpośrednio poprzedzający podnoszenie może zostać zakwalifikowany jako faza przygotowania.
 
 Dla wykrytego ruchu wyróżniane są fazy przygotowania, podnoszenia i opuszczania, natomiast pozostałe fragmenty nagrania oznaczane są jako stan spoczynku. Wyznaczone granice powtórzeń są następnie wykorzystywane do obliczenia ich charakterystyk i dalszej oceny.
 
@@ -38,11 +38,11 @@ Dla całego powtórzenia wyznaczana jest również zmiana kąta nachylenia plec�
 
 \subsection{Regułowa ocena pojedynczego powtórzenia}
 
-Ocena pojedynczego powtórzenia wykonywana jest na podstawie wcześniej wyznaczonej charakterystyki ruchu. W pierwszej kolejności sprawdzana jest jego kompletność na podstawie osiągniętego zakresu pionowego przemieszczenia sztangi. Powtórzenie o zbyt małym zakresie jest oznaczane jako niepełne i nie jest traktowane na równi z pełnym wykonaniem ćwiczenia.
+Ocena pojedynczego powtórzenia wykonywana jest na podstawie wcześniej wyznaczonej charakterystyki ruchu. Sprawdzany jest między innymi osiągnięty zakres pionowego przemieszczenia sztangi, porównywany z przebiegiem pozostałych powtórzeń w analizowanej serii. Pozwala to wskazać wykonania o ograniczonym zakresie ruchu.
 
-Dla pełnych powtórzeń oceniana jest pozycja końcowa na podstawie wartości kątów w stawie biodrowym i kolanowym. Pozwala to sprawdzić, czy ruch zakończył się odpowiednim wyprostem. Analizowana jest również zmiana kąta nachylenia pleców w trakcie powtórzenia, której nadmierna wartość powoduje wygenerowanie ostrzeżenia dotyczącego stabilności tułowia.
+Oceniana jest również pozycja końcowa na podstawie wartości kąta kolana oraz przybliżonego kąta pomiędzy tułowiem a udem. Parametry te pozwalają określić stopień wyprostu osiągnięty w górnej pozycji ruchu. Dodatkowo analizowane jest ustawienie tułowia w pozycji początkowej oraz zmiana jego nachylenia w trakcie powtórzenia.
 
-Dodatkowo określana jest charakterystyka pozycji początkowej. Na podstawie wartości kąta kolana może ona zostać zakwalifikowana jako niższa lub wyższa względem typowej pozycji obserwowanej w analizowanej serii. Informacja ta ma charakter opisowy i nie jest sama w sobie traktowana jako błąd wykonania.
+Określana jest także charakterystyka pozycji początkowej. Na podstawie wartości kąta kolana może ona zostać opisana jako niższa lub wyższa względem typowej pozycji obserwowanej w analizowanej serii. Informacja ta ma charakter opisowy i nie jest sama w sobie traktowana jako błąd wykonania.
 
 \subsection{Ocena spójności serii}
 
